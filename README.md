@@ -77,17 +77,6 @@ python manage.py runserver
 
 L'application écoute sur <http://127.0.0.1:8000/>.
 
-### Comptes de démonstration
-
-| Rôle | Identifiant | Mot de passe |
-|---|---|---|
-| Administrateur | `perpetuel` | `Conjoncture2026!` |
-| Administrateur | `deus` | `DeusStat2026!` |
-| Utilisateur | `analyste` | `Demo2026!` |
-| Utilisateur | `etudiant` | `Demo2026!` |
-| Utilisateur | `invite` | `Demo2026!` |
-
-À changer avant tout usage réel.
 
 ## Assistant : mode en ligne et mode hors ligne
 
