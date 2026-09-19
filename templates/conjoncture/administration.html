@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block titre %}Administration{% endblock %}
+
+{% block contenu %}
+<div class="entete-page apparition">
+ <div class="fil">Espace réservé</div>
+ <h1>Administration</h1>
+ <p>
+  Gestion des rôles, journal des connexions, notes confidentielles et suivi
+  de l'activité. Deux administrateurs au maximum ; les utilisateurs ne sont
+  pas limités en nombre.
+ </p>
+</div>
+
+<div class="grille grille-4" style="margin-bottom:1.1rem">
+ <div class="carte kpi">
+  <span class="etiquette">Utilisateurs</span>
+  <span class="valeur">{{ stats.utilisateurs }}</span>
+  <span class="annexe">dont {{ nb_admins }} administrateur{{ nb_admins|pluralize }} (max {{ max_admins }})</span>
+ </div>
+ <div class="carte kpi">
+  <span class="etiquette">Conversations</span>
+  <span class="valeur">{{ stats.conversations }}</span>
+  <span class="annexe">{{ stats.messages }} messages échangés</span>
+ </div>
+ <div class="carte kpi">
+  <span class="etiquette">Rapports générés</span>
+  <span class="valeur">{{ stats.rapports }}</span>
+  <span class="annexe">PDF produits</span>
+ </div>
+ <div class="carte kpi">
+  <span class="etiquette">Administrateurs</span>
+  <span class="valeur">{{ nb_admins }}<small>/ {{ max_admins }}</small></span>
+  <span class="annexe">Quota {{ max_admins }} atteint{% if nb_admins >= max_admins %}, aucune promotion possible{% endif %}</span>
+ </div>
+</div>
+
+<div class="grille grille-2" style="align-items:start;margin-bottom:1.1rem">
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.1rem">Promouvoir un utilisateur</h2></div>
+  {% if nb_admins >= max_admins %}
+   <div class="alerte alerte-avert">
+    Le quota de {{ max_admins }} administrateurs est atteint. Rétrogradez un
+    administrateur pour en promouvoir un autre.
+   </div>
+  {% else %}
+   <form method="post">
+    {% csrf_token %}
+    <div class="champ-groupe">
+     <label for="{{ form.utilisateur.id_for_label }}">{{ form.utilisateur.label }}</label>
+     {{ form.utilisateur }}
+    </div>
+    <button type="submit" name="promouvoir" value="1" class="bouton bouton-large">Promouvoir administrateur</button>
+   </form>
+  {% endif %}
+  <p class="petit muet" style="margin-top:.9rem">
+   Un administrateur accède aux notes internes et aux rapports confidentiels.
+  </p>
+ </div>
+
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.1rem">Notes internes confidentielles</h2></div>
+  {% for n in notes %}
+  <div class="bloc-stat" style="border-left-color:var(--rouge);margin-bottom:.7rem">
+   <span class="etiquette">{{ n.titre }}</span>
+   <p class="petit" style="margin:.4rem 0 0">{{ n.contenu }}</p>
+  </div>
+  {% endfor %}
+  <p class="petit muet">
+   Ces notes ne sont jamais transmises à un utilisateur non administrateur,
+   ni par la plateforme, ni par l'assistant.
+  </p>
+ </div>
+</div>
+
+<div class="carte" style="margin-bottom:1.1rem">
+ <div class="carte-titre"><h2 style="font-size:1.1rem">Comptes de la plateforme</h2></div>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr><th>Identifiant</th><th>Nom</th><th>Rôle</th><th>Organisation</th><th>Actif</th><th></th></tr></thead>
+   <tbody>
+    {% for u in utilisateurs %}
+    <tr>
+     <td><b>{{ u.username }}</b></td>
+     <td>{{ u.nom_complet }}</td>
+     <td>
+      {% if u.role == 'admin' %}<span class="badge-role">Administrateur</span>
+      {% else %}<span class="badge-role public" style="background:var(--fond);color:var(--ardoise);border-color:var(--bord)">Utilisateur</span>{% endif %}
+     </td>
+     <td class="petit">{{ u.organisation|default:", " }}</td>
+     <td>{{ u.is_active|yesno:"oui,non" }}</td>
+     <td>
+      {% if u.role == 'admin' and u.pk != user.pk %}
+      <form method="post" style="display:inline">
+       {% csrf_token %}
+       <button type="submit" name="retrograder" value="{{ u.pk }}" class="bouton bouton-petit bouton-fantome">Rétrograder</button>
+      </form>
+      {% endif %}
+     </td>
+    </tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+</div>
+
+<div class="carte">
+ <div class="carte-titre"><h2 style="font-size:1.1rem">Journal des connexions et des actions</h2></div>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr><th>Date</th><th>Utilisateur</th><th>Action</th><th>Détail</th><th>Adresse IP</th></tr></thead>
+   <tbody>
+    {% for j in journal %}
+    <tr>
+     <td class="nombre">{{ j.cree_le|date:"d/m/Y H:i" }}</td>
+     <td>{{ j.utilisateur.nom_complet|default:"anonyme" }}</td>
+     <td>{{ j.action }}</td>
+     <td class="petit">{{ j.detail|default:", " }}</td>
+     <td class="nombre">{{ j.adresse_ip|default:", " }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" class="petit muet">Journal vide.</td></tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+</div>
+{% endblock %}

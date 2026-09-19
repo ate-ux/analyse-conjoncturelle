@@ -1,0 +1,267 @@
+/* ==========================================================================
+  Styles complémentaires, import de données, prédictions, séries infra-annuelles
+  Reprend la palette définie dans style.css.
+  ========================================================================== */
+
+/* --- En-tête de page ----------------------------------------------------- */
+.tete-page {
+ display: flex;
+ align-items: flex-end;
+ justify-content: space-between;
+ gap: 1.5rem;
+ flex-wrap: wrap;
+ margin-bottom: 1.5rem;
+}
+.tete-page h1 {
+ font-family: var(--serif);
+ font-size: clamp(1.6rem, 3vw, 2.2rem);
+ margin: .15rem 0 .4rem;
+ color: var(--bleu-900);
+ letter-spacing: -.01em;
+}
+.sur-titre {
+ font-size: .72rem;
+ letter-spacing: .14em;
+ text-transform: uppercase;
+ color: var(--or);
+ font-weight: 700;
+ margin: 0;
+}
+.chapeau {
+ color: var(--ardoise);
+ max-width: 62ch;
+ margin: 0;
+}
+.actions-tete { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* --- Blocs --------------------------------------------------------------- */
+.bloc {
+ background: var(--blanc);
+ border: 1px solid var(--bord);
+ border-radius: var(--rayon);
+ box-shadow: var(--ombre);
+ padding: 1.4rem 1.5rem;
+ margin-bottom: 1.5rem;
+}
+.bloc-tete { margin-bottom: 1.1rem; }
+.bloc-tete h2 {
+ font-family: var(--serif);
+ font-size: 1.2rem;
+ margin: 0 0 .2rem;
+ color: var(--bleu-900);
+}
+.bloc-alerte { border-left: 4px solid var(--rouge); }
+
+/* --- Étiquettes ---------------------------------------------------------- */
+.etiquette {
+ display: inline-block;
+ padding: .15rem .55rem;
+ border-radius: 999px;
+ font-size: .72rem;
+ font-weight: 700;
+ letter-spacing: .02em;
+ background: var(--bleu-100);
+ color: var(--bleu-800);
+}
+.etiquette.confidentiel { background: #fbe9ec; color: var(--rouge); }
+.etiquette.statut-valide { background: #e7f4ec; color: var(--vert); }
+.etiquette.statut-partiel { background: #fdf3dd; color: #8a6414; }
+.etiquette.statut-rejete { background: #fbe9ec; color: var(--rouge); }
+.etiquette.statut-en_attente { background: var(--bleu-100); color: var(--bleu-700); }
+
+/* --- Tuiles de synthèse --------------------------------------------------- */
+.grille-indicateurs {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+ gap: .9rem;
+ margin-bottom: 1.1rem;
+}
+.tuile {
+ background: linear-gradient(180deg, #fbfcfd, var(--blanc));
+ border: 1px solid var(--bord);
+ border-radius: 12px;
+ padding: .9rem 1rem;
+ display: flex;
+ flex-direction: column;
+ gap: .2rem;
+}
+.tuile-valeur {
+ font-family: var(--serif);
+ font-size: 1.45rem;
+ font-weight: 700;
+ color: var(--bleu-900);
+ line-height: 1.15;
+}
+.tuile-libelle {
+ font-size: .76rem;
+ letter-spacing: .04em;
+ text-transform: uppercase;
+ color: var(--ardoise-clair);
+ font-weight: 600;
+}
+.fleche { color: var(--or); font-weight: 700; }
+.rejet { color: var(--rouge); font-weight: 700; }
+.nombre { text-align: right; font-variant-numeric: tabular-nums; }
+.vide { text-align: center; color: var(--ardoise-clair); padding: 1.5rem; font-style: italic; }
+
+/* --- Formulaires --------------------------------------------------------- */
+.formulaire-import { display: block; }
+.grille-formulaire {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+ gap: 1rem;
+ margin-bottom: 1rem;
+}
+.champ-bloc { display: flex; flex-direction: column; gap: .3rem; }
+.champ-bloc.large { grid-column: 1 / -1; }
+.champ-bloc label {
+ font-size: .78rem;
+ font-weight: 700;
+ letter-spacing: .03em;
+ text-transform: uppercase;
+ color: var(--ardoise);
+}
+.groupe-champs {
+ border: 1px solid var(--bord);
+ border-radius: 12px;
+ padding: 1rem 1.1rem .4rem;
+ margin: 0 0 1rem;
+}
+.groupe-champs legend {
+ font-size: .78rem;
+ font-weight: 700;
+ letter-spacing: .05em;
+ text-transform: uppercase;
+ color: var(--or);
+ padding: 0 .5rem;
+}
+.case {
+ display: flex;
+ align-items: center;
+ gap: .5rem;
+ font-size: .88rem;
+ color: var(--encre);
+ margin: .4rem 0 .8rem;
+ cursor: pointer;
+}
+.case input { width: auto; margin: 0; }
+.pied-formulaire {
+ display: flex;
+ align-items: center;
+ gap: 1rem;
+ flex-wrap: wrap;
+ margin-top: 1rem;
+}
+.aide { font-size: .78rem; color: var(--ardoise-clair); margin: 0; }
+.erreur-champ { font-size: .78rem; color: var(--rouge); margin: 0; font-weight: 600; }
+
+/* --- Aide sur les formats ------------------------------------------------- */
+.aide-format {
+ margin-top: 1.2rem;
+ border: 1px dashed var(--bord);
+ border-radius: 12px;
+ padding: .8rem 1.1rem;
+ background: #fbfcfd;
+}
+.aide-format summary {
+ cursor: pointer;
+ font-weight: 700;
+ color: var(--bleu-700);
+ font-size: .9rem;
+}
+.corps-aide { padding-top: .8rem; }
+.bloc-code {
+ font-family: var(--mono);
+ font-size: .8rem;
+ background: var(--bleu-900);
+ color: var(--or-clair);
+ padding: .85rem 1rem;
+ border-radius: 10px;
+ overflow-x: auto;
+ line-height: 1.55;
+ margin: .5rem 0 .9rem;
+}
+.corps-aide code {
+ font-family: var(--mono);
+ font-size: .82em;
+ background: var(--bleu-100);
+ color: var(--bleu-800);
+ padding: .08rem .35rem;
+ border-radius: 5px;
+}
+
+/* --- Prédictions comparées ------------------------------------------------ */
+.grille-modeles {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+ gap: 1rem;
+ margin-bottom: 1.2rem;
+}
+.modele-carte {
+ border: 1px solid var(--bord);
+ border-radius: 12px;
+ padding: 1rem 1.1rem;
+ background: var(--blanc);
+ display: flex;
+ flex-direction: column;
+ gap: .45rem;
+}
+.modele-carte.retenu {
+ border-color: var(--or);
+ box-shadow: 0 0 0 3px rgba(201, 162, 39, .14);
+}
+.modele-nom {
+ font-family: var(--serif);
+ font-size: 1.05rem;
+ font-weight: 700;
+ color: var(--bleu-900);
+}
+.modele-mesures {
+ display: flex;
+ gap: 1.2rem;
+ font-size: .84rem;
+ color: var(--ardoise);
+}
+.modele-mesures b { color: var(--encre); font-variant-numeric: tabular-nums; }
+.badge-retenu {
+ align-self: flex-start;
+ background: var(--or);
+ color: #7a4a00;
+ font-size: .7rem;
+ font-weight: 800;
+ letter-spacing: .06em;
+ text-transform: uppercase;
+ padding: .16rem .55rem;
+ border-radius: 999px;
+}
+.modele-note { font-size: .8rem; color: var(--ardoise-clair); margin: 0; }
+
+/* --- Séries infra-annuelles ---------------------------------------------- */
+.bascule-periodicite {
+ display: inline-flex;
+ border: 1px solid var(--bord);
+ border-radius: 999px;
+ overflow: hidden;
+ background: var(--blanc);
+}
+.bascule-periodicite a {
+ padding: .4rem .95rem;
+ font-size: .82rem;
+ font-weight: 600;
+ color: var(--ardoise);
+ text-decoration: none;
+ border-right: 1px solid var(--bord);
+}
+.bascule-periodicite a:last-child { border-right: 0; }
+.bascule-periodicite a.actif { background: var(--bleu-800); color: var(--blanc); }
+.mention-periode {
+ font-size: .8rem;
+ color: var(--ardoise-clair);
+ margin-top: .5rem;
+}
+
+@media (max-width: 720px) {
+ .tete-page { align-items: flex-start; }
+ .tete-page h1 { font-size: 1.5rem; }
+ .bloc { padding: 1.1rem 1rem; }
+}

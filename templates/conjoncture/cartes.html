@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Cartes{% endblock %}
+
+{% block entete_extra %}
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+{% endblock %}
+
+{% block contenu %}
+<div class="entete-page apparition">
+ <div class="fil">Géographie économique</div>
+ <h1>Cartes de la conjoncture</h1>
+ <p>
+  Dix régions du Cameroun, six pays de la CEMAC. Choisissez un indicateur :
+  la carte se colore, la légende donne les seuils, et le survol restitue la
+  valeur exacte de chaque territoire.
+ </p>
+</div>
+
+<div class="grille grille-2" style="margin-bottom:1.1rem">
+ <div class="carte kpi">
+  <span class="etiquette">Régions cartographiées</span>
+  <span class="valeur">10<small>régions</small></span>
+  <span class="annexe">Population, densité, pauvreté</span>
+ </div>
+ <div class="carte kpi">
+  <span class="etiquette">Pays de la zone</span>
+  <span class="valeur">6<small>États</small></span>
+  <span class="annexe">PIB, croissance, inflation</span>
+ </div>
+</div>
+
+<div class="carte">
+ <div class="carte-titre" style="flex-wrap:wrap;gap:.8rem">
+  <h2 style="font-size:1.1rem" id="titre-carte">Cameroun, régions</h2>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+   <div class="bascule-carte" id="bascule-territoire">
+    <button data-territoire="regions" class="actif">Régions du Cameroun</button>
+    <button data-territoire="pays">Pays de la CEMAC</button>
+   </div>
+   <select class="champ" id="select-indicateur" style="width:auto;min-width:190px">
+    <option value="pauvrete">Taux de pauvreté (2022)</option>
+    <option value="population">Population</option>
+    <option value="densite">Densité (hab/km²)</option>
+   </select>
+  </div>
+ </div>
+ <div id="carte" class="carte-geo"></div>
+ <div class="legende" id="legende"></div>
+ <p class="petit muet" style="margin-top:.8rem">
+  Sources : INS Cameroun (ECAM 5, RGPH) pour le Cameroun ; Banque mondiale et
+  BEAC pour les pays de la CEMAC. Contours : geoBoundaries et Natural Earth.
+ </p>
+</div>
+
+<div class="grille grille-2" style="margin-top:1.1rem">
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">Densité de population par région</h2></div>
+  <canvas class="graphique" id="graph-densite"></canvas>
+  <p class="petit muet">Habitants au km², RGPH et projections INS.</p>
+ </div>
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">PIB des pays de la CEMAC</h2></div>
+  <canvas class="graphique" id="graph-pib-pays"></canvas>
+  <p class="petit muet">Milliards de dollars, 2025, Banque mondiale.</p>
+ </div>
+</div>
+
+<script id="donnees-regions" type="application/json">
+[{% for r in regions %}{"nom":"{{ r.nom }}","cle":"{{ r.cle }}","population":{{ r.population }},"densite":{{ r.densite }},"pauvrete":{{ r.pauvrete }},"chef_lieu":"{{ r.chef_lieu }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+<script id="donnees-pays" type="application/json">
+[{% for p in pays %}{"iso":"{{ p.iso }}","nom":"{{ p.nom }}","croissance":{{ p.croissance }},"inflation":{{ p.inflation }},"pib":{{ p.pib_mds }},"population":{{ p.population }}}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'vendor/chart/chart.umd.js' %}"></script>
+<script src="{% static 'js/graphiques.js' %}"></script>
+<script src="{% static 'js/cartes.js' %}"></script>
+{% endblock %}

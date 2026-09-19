@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Prédictions{% endblock %}
+
+{% block contenu %}
+<div class="tete-page">
+ <div>
+  <p class="sur-titre">Modélisation</p>
+  <h1>Prédictions comparées</h1>
+  <p class="chapeau">
+   Quatre modèles ajustés sur la même série, évalués hors échantillon, puis
+   comparés. Le modèle le plus juste l'emporte, pas le plus complexe.
+  </p>
+ </div>
+</div>
+
+<section class="bloc">
+ <header class="bloc-tete">
+  <h2>Série à analyser</h2>
+ </header>
+ <form method="get" class="grille-formulaire">
+  <div class="champ-bloc">
+   <label for="serie">Série</label>
+   <select name="serie" id="serie" class="champ" onchange="this.form.submit()">
+    {% regroup catalogue by groupe as groupes %}
+    {% for g in groupes %}
+     <optgroup label="{{ g.grouper }}">
+     {% for item in g.list %}
+      <option value="{{ item.cle }}" {% if item.cle == cle %}selected{% endif %}>
+       {{ item.libelle }}{% if item.periodicite %}, {{ item.periodicite }}{% endif %}
+      </option>
+     {% endfor %}
+     </optgroup>
+    {% endfor %}
+   </select>
+  </div>
+  <div class="champ-bloc">
+   <label for="horizon">Horizon (périodes)</label>
+   <select name="horizon" id="horizon" class="champ" onchange="this.form.submit()">
+    {% for h in "123456789012" %}{% endfor %}
+    {% for h in horizons %}{% endfor %}
+   </select>
+  </div>
+ </form>
+</section>
+
+{% if not comparaison %}
+<section class="bloc">
+ <p class="vide">
+  Cette série est trop courte pour comparer des modèles : il faut au moins
+  six points. Importez davantage de données ou choisissez une autre série.
+ </p>
+</section>
+{% else %}
+
+<section class="bloc">
+ <header class="bloc-tete">
+  <h2>{{ libelle }}</h2>
+  <p class="petit">
+   {% if unite %}{{ unite }} · {% endif %}{{ source|default:"source non précisée" }}
+   · {{ comparaison.debut }} → {{ comparaison.fin }}
+   · {{ comparaison.nb_observations }} points ({{ comparaison.periodicite }})
+  </p>
+ </header>
+
+ <div class="grille-indicateurs">
+  <div class="tuile">
+   <span class="tuile-valeur">{{ comparaison.nb_observations }}</span>
+   <span class="tuile-libelle">Points disponibles</span>
+  </div>
+  <div class="tuile">
+   <span class="tuile-valeur">{{ comparaison.n_apprentissage }}</span>
+   <span class="tuile-libelle">Apprentissage</span>
+  </div>
+  <div class="tuile">
+   <span class="tuile-valeur">{{ comparaison.n_test }}</span>
+   <span class="tuile-libelle">Test (hors échantillon)</span>
+  </div>
+  <div class="tuile">
+   <span class="tuile-valeur">{{ comparaison.derniere_valeur }}</span>
+   <span class="tuile-libelle">Dernière valeur ({{ comparaison.derniere_periode }})</span>
+  </div>
+ </div>
+
+ <div class="encadre">
+  <p><strong>Lecture.</strong> {{ synthese }}</p>
+ </div>
+</section>
+
+<section class="bloc">
+ <header class="bloc-tete">
+  <h2>Comparaison des modèles</h2>
+  <p class="petit">
+   Chaque modèle est ajusté sur les {{ comparaison.n_apprentissage }} premières
+   périodes, puis prédit les {{ comparaison.n_test }} dernières. L'erreur est
+   mesurée sur ces prédictions.
+  </p>
+ </header>
+
+ <div class="grille-modeles">
+  {% for m in comparaison.modeles %}
+  <div class="modele-carte {% if m.retenu %}retenu{% endif %}">
+   {% if m.retenu %}<span class="badge-retenu">Retenu</span>{% endif %}
+   <span class="modele-nom">{{ m.nom }}</span>
+   {% if m.disponible %}
+    <div class="modele-mesures">
+     <span>RMSE <b>{{ m.scores.rmse }}</b></span>
+     <span>MAE <b>{{ m.scores.mae }}</b></span>
+     {% if m.scores.mape is not None %}
+      <span>MAPE <b>{{ m.scores.mape }} %</b></span>
+     {% else %}
+      <span title="Série à valeurs de signes opposés ou proches de zéro : la MAPE n'a pas de sens ici.">MAPE <b>, </b></span>
+     {% endif %}
+    </div>
+   {% else %}
+    <p class="modele-note">Non ajustable sur cette série.</p>
+   {% endif %}
+   <p class="modele-note">{{ m.note }}</p>
+  </div>
+  {% endfor %}
+ </div>
+
+ <p class="mention-periode">
+  Rappel méthodologique : la MAPE est omise lorsque la série contient des
+  valeurs de signes opposés ou proches de zéro, le rapport à la valeur réelle
+  n'aurait alors aucun sens. Le RMSE reste, lui, toujours lisible.
+ </p>
+</section>
+
+{% if comparaison.projection %}
+<section class="bloc">
+ <header class="bloc-tete">
+  <h2>Projection</h2>
+  <p class="petit">
+   Modèle retenu : <strong>{{ comparaison.projection.methode }}</strong>, 
+   intervalle {{ comparaison.projection.intervalle }}.
+   {% if comparaison.projection.note %}{{ comparaison.projection.note }}{% endif %}
+  </p>
+ </header>
+
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead>
+    <tr>
+     <th>Période</th>
+     <th class="nombre">Valeur projetée</th>
+     <th class="nombre">Borne basse</th>
+     <th class="nombre">Borne haute</th>
+    </tr>
+   </thead>
+   <tbody>
+    {% for p in comparaison.projection.points %}
+    <tr>
+     <td><strong>{{ p.periode }}</strong></td>
+     <td class="nombre">{{ p.valeur }}</td>
+     <td class="nombre">{{ p.bas|default:", " }}</td>
+     <td class="nombre">{{ p.haut|default:", " }}</td>
+    </tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+
+ <canvas class="graphique" id="graphique-prevision" height="120"></canvas>
+</section>
+{% endif %}
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'vendor/chart/chart.umd.js' %}"></script>
+{% if comparaison %}<script id="serie-prevision" type="application/json">{{ serie_json|safe }}</script>{% endif %}
+{% if comparaison.projection %}<script id="projection" type="application/json">{{ projection_json|safe }}</script>{% endif %}
+<script src="{% static 'js/previsions.js' %}"></script>
+{% endblock %}

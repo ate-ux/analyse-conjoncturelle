@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Aperçu de l'import{% endblock %}
+
+{% block contenu %}
+<div class="tete-page">
+ <div>
+  <p class="sur-titre">Import de données</p>
+  <h1>Aperçu avant import</h1>
+  <p class="chapeau">
+   Fichier <strong>{{ nom_fichier }}</strong>, rien n'a encore été écrit.
+   Vérifiez le résumé puis confirmez.
+  </p>
+ </div>
+</div>
+
+<section class="bloc">
+ <header class="bloc-tete">
+  <h2>Ce que la plateforme a lu</h2>
+ </header>
+
+ <div class="grille-indicateurs">
+  <div class="tuile">
+   <span class="tuile-valeur">{{ resume.nb_observations }}</span>
+   <span class="tuile-libelle">Observations exploitables</span>
+  </div>
+  <div class="tuile">
+   <span class="tuile-valeur">{% if resume.nb_erreurs %}<span class="rejet">{{ resume.nb_erreurs }}</span>{% else %}0{% endif %}</span>
+   <span class="tuile-libelle">Lignes rejetées</span>
+  </div>
+  <div class="tuile">
+   <span class="tuile-valeur">{{ format }}</span>
+   <span class="tuile-libelle">Format détecté</span>
+  </div>
+  <div class="tuile">
+   <span class="tuile-valeur">{{ periodicite }}</span>
+   <span class="tuile-libelle">Périodicité</span>
+  </div>
+ </div>
+
+ <div class="grille-indicateurs">
+  <div class="tuile">
+   <span class="tuile-valeur">{{ resume.nb_entites }}</span>
+   <span class="tuile-libelle">Entités distinctes</span>
+  </div>
+  <div class="tuile">
+   <span class="tuile-valeur">{{ resume.debut|default:", " }} <span class="fleche">→</span> {{ resume.fin|default:", " }}</span>
+   <span class="tuile-libelle">Couverture</span>
+  </div>
+  <div class="tuile">
+   <span class="tuile-valeur">{{ resume.min|default:", " }} / {{ resume.max|default:", " }}</span>
+   <span class="tuile-libelle">Valeurs extrêmes</span>
+  </div>
+  <div class="tuile">
+   <span class="tuile-valeur">{{ resume.nb_observations }}</span>
+   <span class="tuile-libelle">Lignes à écrire</span>
+  </div>
+ </div>
+</section>
+
+<section class="bloc">
+ <header class="bloc-tete">
+  <h2>Échantillon des lignes retenues</h2>
+  <p class="petit">Les douze premières observations.</p>
+ </header>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr><th>Période</th><th>Entité</th><th class="nombre">Valeur</th></tr></thead>
+   <tbody>
+    {% for o in resume.echantillon %}
+    <tr>
+     <td>{{ o.periode }}</td>
+     <td>{% if o.entite %}{{ o.entite }}{% else %}<span class="petit">ensemble</span>{% endif %}</td>
+     <td class="nombre">{{ o.valeur }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3" class="vide">Aucune ligne exploitable.</td></tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+</section>
+
+{% if resume.erreurs %}
+<section class="bloc bloc-alerte">
+ <header class="bloc-tete">
+  <h2>Lignes rejetées</h2>
+  <p class="petit">
+   Ces lignes ne seront pas importées. Vous pouvez confirmer quand même :
+   les autres passeront.
+  </p>
+ </header>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr><th>Ligne</th><th>Motif</th></tr></thead>
+   <tbody>
+    {% for e in resume.erreurs %}
+    <tr><td>{{ e.ligne }}</td><td>{{ e.motif }}</td></tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+</section>
+{% endif %}
+
+<form method="post" action="{% url 'conjoncture:donnees_confirmer' %}" class="pied-formulaire">
+ {% csrf_token %}
+ {% if resume.nb_observations %}
+  <button type="submit" class="bouton">Confirmer et importer</button>
+ {% else %}
+  <button type="submit" class="bouton" disabled>Aucune donnée exploitable</button>
+ {% endif %}
+ <a href="{% url 'conjoncture:donnees' %}" class="bouton fantome">Annuler</a>
+</form>
+{% endblock %}

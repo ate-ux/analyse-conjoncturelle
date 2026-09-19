@@ -1,0 +1,90 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titre %}Analyse conjoncturelle{% endblock %} · Cameroun & CEMAC</title>
+<meta name="description" content="Plateforme d'analyse conjoncturelle du Cameroun et de la zone CEMAC : tableau de bord, cartes régionales, statistiques, assistant et rapports PDF.">
+<meta name="theme-color" content="#0a2438">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/complements.css' %}">
+<link rel="stylesheet" href="{% static 'css/images_marque.css' %}">
+<link rel="stylesheet" href="{% static 'css/analyses.css' %}">
+{% block entete_extra %}{% endblock %}
+</head>
+<body>
+
+<header class="entete-app">
+  <div class="entete-interne">
+    <a href="{% url 'conjoncture:tableau_de_bord' %}" class="entete-marque">
+      <img class="marque-logo-entete" src="{% static 'images/issea_logo.png' %}"
+           alt="Logo de l'ISSEA">
+      <span>
+        <strong>Analyse conjoncturelle</strong>
+        <span>Cameroun · CEMAC</span>
+      </span>
+    </a>
+
+    <nav class="nav-app">
+      <a href="{% url 'conjoncture:tableau_de_bord' %}" class="{% if page == 'tableau_de_bord' %}actif{% endif %}">Tableau de bord</a>
+      <a href="{% url 'conjoncture:cartes' %}" class="{% if page == 'cartes' %}actif{% endif %}">Cartes</a>
+      <a href="{% url 'conjoncture:regions' %}" class="{% if page == 'regions' %}actif{% endif %}">Régions</a>
+      <a href="{% url 'conjoncture:statistiques' %}" class="{% if page == 'statistiques' %}actif{% endif %}">Statistiques</a>
+      <a href="{% url 'conjoncture:previsions' %}" class="{% if page == 'previsions' %}actif{% endif %}">Prédictions</a>
+      <a href="{% url 'conjoncture:saisonnalite' %}" class="{% if page == 'saisonnalite' %}actif{% endif %}">Saisonnalité</a>
+      <a href="{% url 'conjoncture:multivarie' %}" class="{% if page == 'multivarie' %}actif{% endif %}">Multivarié</a>
+      <a href="{% url 'conjoncture:assistant' %}" class="{% if page == 'assistant' %}actif{% endif %}">Le Perpétuel</a>
+      <a href="{% url 'conjoncture:rapports' %}" class="{% if page == 'rapports' %}actif{% endif %}">Rapports</a>
+      <a href="{% url 'conjoncture:methodologie' %}" class="{% if page == 'methodologie' %}actif{% endif %}">Méthodologie</a>
+      {% if est_admin %}
+      <a href="{% url 'conjoncture:donnees' %}" class="{% if page == 'donnees' %}actif{% endif %}">Données</a>
+      <a href="{% url 'conjoncture:administration' %}" class="{% if page == 'administration' %}actif{% endif %}">Administration</a>
+      {% endif %}
+    </nav>
+
+    <div class="zone-utilisateur">
+      {% if est_admin %}
+        <span class="badge-role">Administrateur</span>
+      {% else %}
+        <span class="badge-role public">Utilisateur</span>
+      {% endif %}
+      <span class="pastille" title="{{ user.nom_complet }}">{{ user.initiales }}</span>
+      <a href="{% url 'conjoncture:deconnexion' %}" class="sortie">Quitter</a>
+    </div>
+  </div>
+</header>
+
+<main class="contenu">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alerte alerte-{% if message.tags == 'error' %}erreur{% elif message.tags == 'success' %}succes{% else %}info{% endif %}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  {% block contenu %}{% endblock %}
+</main>
+
+<footer class="pied-app">
+  <div class="pied-interne">
+    <div>
+      <strong>Analyse conjoncturelle</strong>, Cameroun &amp; zone CEMAC.
+      Données Banque mondiale, INS Cameroun, BEAC et DG Trésor.
+    </div>
+    <div>
+      Assistant : <strong>{{ assistant_nom }}</strong>
+      {% if assistant_en_ligne %}<span class="etat-assistant en-ligne" style="display:inline-flex;margin-left:.4rem"><span class="point"></span>en ligne</span>
+      {% else %}<span class="etat-assistant hors-ligne" style="display:inline-flex;margin-left:.4rem"><span class="point"></span>hors ligne</span>{% endif %}
+    </div>
+  </div>
+
+  <p class="signature-pied">
+    Conçu et développé par <strong>Joseph ATEBA</strong>, Data Scientist<br>
+    <a href="mailto:atebajoseph047@gmail.com">atebajoseph047@gmail.com</a>
+    &middot; <a href="tel:+237670211522">+237 670 211 522</a>
+  </p>
+</footer>
+
+<script src="{% static 'js/app.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

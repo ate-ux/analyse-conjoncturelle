@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block titre %}Méthodologie{% endblock %}
+
+{% block contenu %}
+<div class="entete-page apparition">
+ <div class="fil">Note méthodologique</div>
+ <h1>Sources, définitions et méthodes</h1>
+ <p>
+  Toute plateforme d'analyse doit dire d'où viennent ses chiffres et comment
+  elle les traite. Cette page rassemble les sources, les définitions des
+  indicateurs et les méthodes statistiques employées.
+ </p>
+</div>
+
+<div class="carte" style="margin-bottom:1.1rem">
+ <div class="carte-titre"><h2 style="font-size:1.1rem">1. Sources mobilisées</h2></div>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr><th>Source</th><th>Usage dans la plateforme</th><th>Adresse</th></tr></thead>
+   <tbody>
+    {% for cle, s in sources.items %}
+    <tr>
+     <td><b>{{ s.nom }}</b></td>
+     <td class="petit">
+      {% if cle == 'bm' %}Séries longues : PIB, inflation, population, emploi, structure sectorielle.
+      {% elif cle == 'ins' %}Pauvreté et inégalités (ECAM 5), démographie (RGPH), inclusion financière.
+      {% elif cle == 'beac' %}Cadre communautaire, critères de convergence, politique monétaire.
+      {% else %}Conjoncture, finances publiques et dette du Cameroun.{% endif %}
+     </td>
+     <td class="petit"><a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.url }}</a></td>
+    </tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+ <p class="petit muet" style="margin-top:.8rem">
+  Les contours géographiques proviennent de geoBoundaries (régions du
+  Cameroun, ADM1) et de Natural Earth (pays du monde). Le fond de carte est
+  fourni par CARTO.
+ </p>
+</div>
+
+<div class="carte" style="margin-bottom:1.1rem">
+ <div class="carte-titre"><h2 style="font-size:1.1rem">2. Définition des indicateurs</h2></div>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr><th>Indicateur</th><th>Unité</th><th>Source</th><th>Dernière valeur</th><th>Lecture</th></tr></thead>
+   <tbody>
+    {% for cle, ind in indicateurs.items %}
+    <tr>
+     <td><b>{{ ind.libelle }}</b></td>
+     <td class="nombre">{{ ind.unite }}</td>
+     <td class="petit">{{ ind.source }}</td>
+     <td class="nombre">{% if cle == 'pib_croissance' %}3,2 (2025){% elif cle == 'inflation' %}3,4 (2025){% elif cle == 'pib_usd' %}58,9 (2025){% elif cle == 'pib_par_habitant' %}1 972 (2025){% elif cle == 'population' %}29,9 M (2025){% elif cle == 'chomage' %}3,6 (2025){% elif cle == 'pauvrete' %}37,7 (2022){% else %}40,1 (2022){% endif %}</td>
+     <td class="petit">{{ ind.commentaire }}</td>
+    </tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+</div>
+
+<div class="carte" style="margin-bottom:1.1rem">
+ <div class="carte-titre"><h2 style="font-size:1.1rem">3. Indicateurs de structure</h2></div>
+ <div class="grille grille-3">
+  {% for cle, ind in complementaires.items %}
+  <div class="bloc-stat">
+   <span class="etiquette">{{ ind.libelle }}</span>
+   <div class="valeur">{{ ind.valeur }} <span class="petit muet">{{ ind.unite }}</span></div>
+   <p class="petit" style="margin:.45rem 0 0">{{ ind.detail }}</p>
+   <p class="petit muet" style="margin:.3rem 0 0">{{ ind.annee }}</p>
+  </div>
+  {% endfor %}
+ </div>
+</div>
+
+<div class="grille grille-2">
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.1rem">4. Méthodes statistiques</h2></div>
+  <div class="liste-propre">
+   <li><b>Statistiques descriptives</b><span class="petit muet">moyenne, médiane, écart-type, coefficient de variation, étendue</span></li>
+   <li><b>Concentration (HHI)</b><span class="petit muet">indice de Herfindahl-Hirschman, sous 1 500 faible, 1 500-2 500 modérée, au-delà forte</span></li>
+   <li><b>Tendance (MCO)</b><span class="petit muet">régression linéaire : pente, R², erreur type de la pente, statistique de Student, p-value</span></li>
+   <li><b>Prévision</b><span class="petit muet">extrapolation linéaire avec intervalle à 80 % fondé sur l'erreur type résiduelle</span></li>
+   <li><b>Corrélation de Pearson</b><span class="petit muet">coefficient r, r², test de significativité au seuil de 5 %</span></li>
+  </div>
+ </div>
+
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.1rem">5. Avertissements</h2></div>
+  <div class="encadre" style="margin-bottom:.9rem">
+   <h3 style="font-size:.96rem">Ruptures de série</h3>
+   <p class="petit" style="margin:0">
+    La série de pauvreté ECAM 5 (2022) n'est pas comparable aux éditions
+    antérieures : la méthodologie et le seuil ont changé. Les ruptures sont
+    signalées dans les commentaires.
+   </p>
+  </div>
+  <div class="encadre" style="margin-bottom:.9rem">
+   <h3 style="font-size:.96rem">Estimations et projections</h3>
+   <p class="petit" style="margin:0">
+    Les valeurs 2025-2026 sont des estimations. Les prévisions du module
+    statistique sont des extrapolations, non des prévisions officielles.
+   </p>
+  </div>
+  <div class="encadre">
+   <h3 style="font-size:.96rem">Corrélation et causalité</h3>
+   <p class="petit" style="margin:0">
+    Un coefficient de corrélation élevé ne démontre aucune relation causale.
+    Les corrélations sont calculées sur des séries annuelles courtes :
+    leur interprétation reste prudente.
+   </p>
+  </div>
+ </div>
+</div>
+{% endblock %}

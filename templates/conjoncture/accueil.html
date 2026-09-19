@@ -1,0 +1,135 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analyse conjoncturelle · Cameroun & CEMAC</title>
+<meta name="description" content="Plateforme d'analyse conjoncturelle du Cameroun et de la zone CEMAC.">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<header class="entete-app">
+ <div class="entete-interne">
+  <span class="entete-marque">
+   <span class="marque-sceau">AC</span>
+   <span><strong>Analyse conjoncturelle</strong><span>Cameroun · CEMAC</span></span>
+  </span>
+  <nav class="nav-app">
+   <a href="{% url 'conjoncture:methodologie' %}">Méthodologie</a>
+  </nav>
+  <div class="zone-utilisateur">
+   <a href="{% url 'conjoncture:connexion' %}" class="bouton bouton-petit bouton-or">Connexion</a>
+  </div>
+ </div>
+</header>
+
+<section class="heros-accueil">
+ <div class="heros-interne">
+  <h1>La conjoncture du <em>Cameroun</em> et de la zone CEMAC, en clair</h1>
+  <p>
+   Croissance, inflation, pauvreté, finances publiques et disparités
+   territoriales : un observatoire chiffré, cartographié et commenté, de
+   2000 à 2026, à partir des données de la Banque mondiale, de l'INS
+   Cameroun, de la BEAC et de la DG Trésor.
+  </p>
+  <div class="heros-actions">
+   <a href="{% url 'conjoncture:connexion' %}" class="bouton bouton-or">Accéder à la plateforme</a>
+   <a href="{% url 'conjoncture:inscription' %}" class="bouton bouton-fantome" style="color:#fff;border-color:rgba(255,255,255,.35)">Créer un accès utilisateur</a>
+  </div>
+ </div>
+</section>
+
+<section class="section-accueil">
+ <h2>L'espace communautaire en 2025</h2>
+ <p class="intro">
+  Six pays, une monnaie, un objectif de convergence. Voici la photographie de
+  la zone, telle que la restituent les comptes nationaux.
+ </p>
+ <div class="grille grille-4">
+  <div class="carte kpi">
+   <span class="etiquette">PIB cumulé CEMAC</span>
+   <span class="valeur">{{ totaux.pib_mds_usd }}<small>Mds USD</small></span>
+   <span class="annexe">Six pays</span>
+  </div>
+  <div class="carte kpi">
+   <span class="etiquette">Population</span>
+   <span class="valeur">{{ totaux.population_millions }}<small>millions</small></span>
+   <span class="annexe">Espace CEMAC</span>
+  </div>
+  <div class="carte kpi">
+   <span class="etiquette">Croissance moyenne</span>
+   <span class="valeur">{{ totaux.croissance_moyenne }}<small>%</small></span>
+   <span class="annexe">PIB réel, 2025</span>
+  </div>
+  <div class="carte kpi">
+   <span class="etiquette">Inflation moyenne</span>
+   <span class="valeur">{{ totaux.inflation_moyenne }}<small>%</small></span>
+   <span class="annexe">Critère CEMAC : 3 %</span>
+  </div>
+ </div>
+</section>
+
+<section class="section-accueil" style="padding-top:0">
+ <h2>Ce que contient la plateforme</h2>
+ <p class="intro">Six modules, un seul objectif : rendre la conjoncture lisible et vérifiable.</p>
+ <div class="grille grille-3">
+  <div class="carte fonctionnalite">
+   <span class="icone">1</span>
+   <div><h3>Tableau de bord</h3><p>Indicateurs clés, séries longues et lecture commentée de chaque chiffre.</p></div>
+  </div>
+  <div class="carte fonctionnalite">
+   <span class="icone">2</span>
+   <div><h3>Cartes interactives</h3><p>Dix régions du Cameroun et six pays de la CEMAC, coloriés par indicateur.</p></div>
+  </div>
+  <div class="carte fonctionnalite">
+   <span class="icone">3</span>
+   <div><h3>Module statistique</h3><p>Statistiques descriptives, tendances MCO, prévisions et corrélations testées.</p></div>
+  </div>
+  <div class="carte fonctionnalite">
+   <span class="icone">4</span>
+   <div><h3>Le Perpétuel</h3><p>Assistant conversationnel, en ligne comme hors ligne, sur les données de la plateforme.</p></div>
+  </div>
+  <div class="carte fonctionnalite">
+   <span class="icone">5</span>
+   <div><h3>Rapports PDF</h3><p>Synthèses, profils régionaux et notes statistiques générés automatiquement.</p></div>
+  </div>
+  <div class="carte fonctionnalite">
+   <span class="icone">6</span>
+   <div><h3>Deux niveaux d'accès</h3><p>Deux administrateurs pour les données confidentielles, utilisateurs illimités.</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="section-accueil" style="padding-top:0">
+ <div class="carte carte-large">
+  <div class="carte-titre"><h2 style="font-size:1.15rem">Les six pays de la CEMAC</h2></div>
+  <div class="tableau-enveloppe">
+   <table class="tableau">
+    <thead><tr><th>Pays</th><th>Capitale</th><th class="nombre">PIB (Mds USD)</th><th class="nombre">Croissance</th><th class="nombre">Inflation</th><th class="nombre">Population (M)</th></tr></thead>
+    <tbody>
+     {% for p in pays %}
+     <tr>
+      <td><b>{{ p.nom }}</b></td>
+      <td>{{ p.capital }}</td>
+      <td class="nombre">{{ p.pib_mds }}</td>
+      <td class="nombre">{{ p.croissance }} %</td>
+      <td class="nombre">{{ p.inflation }} %</td>
+      <td class="nombre">{{ p.population }}</td>
+     </tr>
+     {% endfor %}
+    </tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<footer class="pied-app">
+ <div class="pied-interne">
+  <div><strong>Analyse conjoncturelle</strong>, Cameroun &amp; CEMAC. Projet académique à l'ISSEA.</div>
+  <div>Données : Banque mondiale, INS Cameroun, BEAC, DG Trésor.</div>
+ </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Tableau de bord{% endblock %}
+
+{% block contenu %}
+<div class="entete-page apparition">
+ <div class="fil">Vue d'ensemble</div>
+ <h1>Tableau de bord conjoncturel</h1>
+ <p>
+  Les indicateurs qui structurent la conjoncture camerounaise et l'espace
+  CEMAC. Chaque chiffre porte sa source et son année ; les séries complètes
+  sont mobilisables dans le module statistique.
+ </p>
+</div>
+
+<div class="grille grille-4" style="margin-bottom:1.1rem">
+ {% for c in cartes|slice:":4" %}
+ <div class="carte kpi">
+  <span class="etiquette">{{ c.libelle }}</span>
+  <span class="valeur">{{ c.valeur }}<small>{{ c.unite }}</small></span>
+  <span class="annexe">
+   {{ c.annee }}
+   {% if c.variation is not None %}
+    &nbsp;·&nbsp;
+    <span class="tendance {% if c.sens == 'baisse' %}{% if c.variation < 0 %}hausse{% else %}baisse{% endif %}{% else %}{% if c.variation > 0 %}hausse{% else %}baisse{% endif %}{% endif %}">
+     {% if c.variation > 0 %}▲{% elif c.variation < 0 %}▼{% else %}■{% endif %} {{ c.variation|floatformat:2 }} pt
+    </span>
+   {% endif %}
+  </span>
+ </div>
+ {% endfor %}
+</div>
+
+{% for c in cartes|slice:"4:" %}
+<div class="carte" style="margin-bottom:1.1rem">
+ <div class="carte-titre">
+  <h2 style="font-size:1.1rem">{{ c.libelle }}</h2>
+  <span class="badge-source">{{ c.source }}</span>
+ </div>
+ <div class="grille grille-2" style="align-items:center">
+  <div>
+   <div class="kpi">
+    <span class="valeur" style="font-size:2.4rem">{{ c.valeur }}<small>{{ c.unite }}</small> <span class="petit muet" style="font-family:var(--sans)">en {{ c.annee }}</span></span>
+   </div>
+   <p class="petit muet" style="margin-top:.7rem">{{ c.commentaire }}</p>
+   {% if c.seuil %}
+   <p class="petit" style="color:var(--or);font-weight:600">Repère : {{ c.seuil_libelle|default:c.seuil }}</p>
+   {% endif %}
+  </div>
+  <div><canvas class="graphique" data-serie='{{ c.serie_json|safe }}' data-libelle="{{ c.libelle }}" data-unite="{{ c.unite }}" data-seuil="{{ c.seuil|default:'' }}"></canvas></div>
+ </div>
+</div>
+{% endfor %}
+
+<div class="grille grille-2" style="margin-top:1.1rem">
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">Régions du Cameroun, pauvreté (2022)</h2></div>
+  <canvas class="graphique" id="graph-pauvrete"></canvas>
+  <p class="petit muet">Source : INS Cameroun, ECAM 5.</p>
+ </div>
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">Croissance du PIB réel, CEMAC (2025)</h2></div>
+  <canvas class="graphique" id="graph-cemac"></canvas>
+  <p class="petit muet">Source : Banque mondiale ; BEAC.</p>
+ </div>
+</div>
+
+<div class="carte" style="margin-top:1.1rem">
+ <div class="carte-titre">
+  <h2 style="font-size:1.05rem">Indicateurs de structure et de finances publiques</h2>
+  <span class="badge-source">DG Trésor · Banque mondiale · INS</span>
+ </div>
+ <div class="grille grille-3">
+  {% for cle, ind in complementaires.items %}
+  <div class="bloc-stat">
+   <span class="etiquette">{{ ind.libelle }}</span>
+   <div class="valeur">{{ ind.valeur }}{% if ind.unite %} <span class="petit muet">{{ ind.unite }}</span>{% endif %}</div>
+   <p class="petit muet" style="margin:.5rem 0 0">{{ ind.detail }}</p>
+   <p class="petit" style="margin:.4rem 0 0;color:var(--ardoise-clair)">{{ ind.annee }}</p>
+  </div>
+  {% endfor %}
+ </div>
+</div>
+
+<div class="carte carte-large" style="margin-top:1.1rem">
+ <div class="carte-titre"><h2 style="font-size:1.05rem">Les six pays de la CEMAC en 2025</h2></div>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr>
+    <th>Pays</th><th>Capitale</th><th class="nombre">PIB (Mds USD)</th>
+    <th class="nombre">Croissance (%)</th><th class="nombre">Inflation (%)</th>
+    <th class="nombre">Population (M)</th><th class="nombre">PIB/hab (USD)</th>
+   </tr></thead>
+   <tbody>
+    {% for p in pays %}
+    <tr>
+     <td><b>{{ p.nom }}</b></td><td>{{ p.capital }}</td>
+     <td class="nombre">{{ p.pib_mds }}</td>
+     <td class="nombre">{{ p.croissance }}</td>
+     <td class="nombre">{{ p.inflation }}</td>
+     <td class="nombre">{{ p.population }}</td>
+     <td class="nombre">{{ p.pib_hab }}</td>
+    </tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+</div>
+
+<script id="donnees-pauvrete" type="application/json">
+[{% for r in regions %}{"nom":"{{ r.nom }}","valeur":{{ r.pauvrete }}}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+<script id="donnees-cemac" type="application/json">
+[{% for p in pays %}{"nom":"{{ p.nom }}","valeur":{{ p.croissance }}}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'vendor/chart/chart.umd.js' %}"></script>
+<script src="{% static 'js/graphiques.js' %}"></script>
+{% endblock %}

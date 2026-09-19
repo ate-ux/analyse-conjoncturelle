@@ -1,0 +1,103 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Créer un compte · Analyse conjoncturelle</title>
+<meta name="theme-color" content="#1560c8">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/images_marque.css' %}">
+</head>
+<body>
+<div class="ecran-connexion">
+
+ <section class="panneau-marque">
+  <div class="marque-haut">
+   <img class="logo-marque" src="{% static 'images/issea_logo.png' %}"
+        alt="Logo de l'ISSEA">
+   <span class="marque-nom">DEUS Stat<small>Observatoire de la conjoncture</small></span>
+  </div>
+  <div>
+   <h1 class="titre-immense">Rejoindre<br><em>la plateforme</em></h1>
+   <p class="accroche">
+    Créez un accès utilisateur : vous consultez le tableau de bord, les
+    cartes, les statistiques, les rapports et l'assistant. Les données
+    confidentielles restent réservées aux administrateurs.
+   </p>
+   <div class="bandeau-chiffres">
+    <div><b>10</b><span>Régions cartographiées</span></div>
+    <div><b>6</b><span>Pays CEMAC</span></div>
+    <div><b>11</b><span>Indicateurs suivis</span></div>
+    <div><b>4</b><span>Types de rapports</span></div>
+   </div>
+  </div>
+
+  <div class="carte-auteur">
+   <img src="{% static 'images/deus_stat_carte.jpg' %}" alt="Carte de marque DEUS Stat">
+   <div class="auteur-texte">
+    <strong>Joseph ATEBA</strong>
+    <span>Data Scientist</span>
+    <span class="auteur-contact">atebajoseph047@gmail.com</span>
+    <span class="auteur-contact">+237 670 211 522</span>
+   </div>
+  </div>
+
+  <p class="pied-marque">Projet académique, ISSEA, option Data Science.</p>
+ </section>
+
+ <section class="panneau-formulaire">
+  <div class="carte-connexion">
+   <h1>Créer un compte</h1>
+   <p class="sous">Accès utilisateur, sans limite de nombre.</p>
+
+   {% if form.non_field_errors %}
+    <div class="alerte alerte-erreur">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+   {% endif %}
+
+   <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="grille grille-2" style="gap:.8rem">
+     <div class="champ-groupe">
+      <label for="{{ form.prenom.id_for_label }}">Prénom</label>{{ form.prenom }}
+     </div>
+     <div class="champ-groupe">
+      <label for="{{ form.nom.id_for_label }}">Nom</label>{{ form.nom }}
+     </div>
+    </div>
+    <div class="champ-groupe">
+     <label for="{{ form.username.id_for_label }}">Nom d'utilisateur *</label>
+     {{ form.username }}
+     {% if form.username.errors %}<div class="alerte alerte-erreur" style="margin-top:.4rem">{{ form.username.errors.0 }}</div>{% endif %}
+    </div>
+    <div class="champ-groupe">
+     <label for="{{ form.email.id_for_label }}">Adresse e-mail</label>{{ form.email }}
+    </div>
+    <div class="champ-groupe">
+     <label for="{{ form.organisation.id_for_label }}">Organisation</label>{{ form.organisation }}
+    </div>
+    <div class="champ-groupe">
+     <label for="{{ form.password1.id_for_label }}">Mot de passe *</label>
+     {{ form.password1 }}
+     {% if form.password1.errors %}<div class="alerte alerte-erreur" style="margin-top:.4rem">{{ form.password1.errors.0 }}</div>{% endif %}
+    </div>
+    <div class="champ-groupe">
+     <label for="{{ form.password2.id_for_label }}">Confirmation *</label>
+     {{ form.password2 }}
+     {% if form.password2.errors %}<div class="alerte alerte-erreur" style="margin-top:.4rem">{{ form.password2.errors.0 }}</div>{% endif %}
+    </div>
+    <button type="submit" class="bouton bouton-large bouton-or">Créer mon compte</button>
+   </form>
+
+   <a href="{% url 'conjoncture:connexion' %}" class="lien-secondaire">J'ai déjà un compte, se connecter</a>
+
+   <p class="signature-carte">
+    Conçu et développé par <strong>Joseph ATEBA</strong>, Data Scientist<br>
+    <a href="mailto:atebajoseph047@gmail.com">atebajoseph047@gmail.com</a>
+    · <a href="tel:+237670211522">+237 670 211 522</a>
+   </p>
+  </div>
+ </section>
+
+</div>
+</body>
+</html>

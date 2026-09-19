@@ -1,0 +1,76 @@
+/* =====================================================================
+   Styles des pages Saisonnalité et Multivarié
+   ===================================================================== */
+
+.grille-cases {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.5rem 1rem;
+  margin-top: 0.6rem;
+}
+
+.case {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(10, 36, 56, 0.04);
+  border: 1px solid rgba(10, 36, 56, 0.08);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.case:hover {
+  background: rgba(10, 36, 56, 0.07);
+}
+
+.case input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.case span {
+  flex: 1;
+}
+
+/* Conteneur de tableau défilant horizontalement sur petits écrans */
+.tableau-defilant {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tableau-defilant .tableau {
+  min-width: 560px;
+}
+
+/* Ligne neutre : la constante, qui n'est pas un régresseur */
+.tableau tr.ligne-neutre {
+  background: rgba(10, 36, 56, 0.035);
+  font-style: italic;
+}
+
+/* Marque de significativité statistique */
+.marque-ok {
+  color: #c9a227;
+  font-weight: 700;
+  margin-left: 0.15rem;
+}
+
+/* Groupe de cases à cocher encadré */
+.groupe-champs {
+  border: 1px solid rgba(10, 36, 56, 0.12);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  margin-top: 1rem;
+}
+
+.groupe-champs legend {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 0.4rem;
+  opacity: 0.75;
+}

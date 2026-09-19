@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Rapports{% endblock %}
+
+{% block contenu %}
+<div class="entete-page apparition">
+ <div class="fil">Production documentaire</div>
+ <h1>Rapports de conjoncture</h1>
+ <p>
+  Quatre formats, générés automatiquement en PDF à partir des données de la
+  plateforme : synthèse nationale, profil régional, profil pays et note
+  statistique. Le document porte ses sources, ses tableaux et ses graphiques.
+ </p>
+</div>
+
+<div class="grille grille-2" style="align-items:start">
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.1rem">Générer un rapport</h2></div>
+  <form method="post">
+   {% csrf_token %}
+   {% for champ in form %}
+    {% if champ.name == 'inclure_graphiques' or champ.name == 'inclure_statistiques' or champ.name == 'confidentiel' %}
+     <div class="champ-groupe" style="display:flex;align-items:center;gap:.55rem">
+      {{ champ }}
+      <label for="{{ champ.id_for_label }}" style="margin:0;text-transform:none;letter-spacing:0;font-size:.88rem;font-weight:500">{{ champ.label }}</label>
+     </div>
+    {% else %}
+     <div class="champ-groupe">
+      <label for="{{ champ.id_for_label }}">{{ champ.label }}</label>
+      {{ champ }}
+      {% if champ.help_text %}<p class="petit muet" style="margin:.3rem 0 0">{{ champ.help_text }}</p>{% endif %}
+      {% if champ.errors %}<div class="alerte alerte-erreur" style="margin-top:.4rem">{{ champ.errors.0 }}</div>{% endif %}
+     </div>
+    {% endif %}
+   {% endfor %}
+   <button type="submit" class="bouton bouton-large bouton-or">Générer le rapport PDF</button>
+  </form>
+  <p class="petit muet" style="margin-top:.9rem">
+   La génération prend quelques secondes. Le fichier apparaît ensuite dans la
+   liste, prêt à télécharger.
+  </p>
+ </div>
+
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.1rem">Les quatre formats</h2></div>
+  <div class="liste-propre">
+   <li><b>Synthèse conjoncturelle</b><span class="petit muet">indicateurs nationaux, graphiques et annexe statistique</span></li>
+   <li><b>Profil régional</b><span class="petit muet">population, densité, pauvreté d'une région</span></li>
+   <li><b>Profil pays CEMAC</b><span class="petit muet">fiche et positionnement dans la zone</span></li>
+   <li><b>Note statistique</b><span class="petit muet">tendances MCO, prévisions et corrélations</span></li>
+  </div>
+  <div class="encadre" style="margin-top:1.2rem">
+   <h3 style="font-size:.98rem">Marquage confidentiel</h3>
+   <p class="petit" style="margin:0">
+    Un rapport marqué confidentiel n'est visible et téléchargeable que par
+    les administrateurs. Un utilisateur qui tente d'y accéder reçoit un refus.
+   </p>
+  </div>
+ </div>
+</div>
+
+<div class="carte" style="margin-top:1.1rem">
+ <div class="carte-titre">
+  <h2 style="font-size:1.1rem">Rapports produits</h2>
+  <span class="badge-source">{{ rapports|length }} document{{ rapports|length|pluralize }}</span>
+ </div>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr><th>Titre</th><th>Type</th><th>Cible</th><th>Période</th><th>Généré par</th><th>Date</th><th></th></tr></thead>
+   <tbody>
+    {% for r in rapports %}
+    <tr>
+     <td>
+      <b>{{ r.titre }}</b>
+      {% if r.donnees.confidentiel %}&nbsp;<span class="etiquette-note">confidentiel</span>{% endif %}
+     </td>
+     <td class="petit">{{ r.get_type_rapport_display }}</td>
+     <td>{{ r.cible|default:", " }}</td>
+     <td class="nombre">{{ r.periode|default:", " }}</td>
+     <td>{{ r.genere_par.nom_complet|default:", " }}</td>
+     <td class="nombre">{{ r.cree_le|date:"d/m/Y H:i" }}</td>
+     <td><a href="{% url 'conjoncture:rapport_telecharger' r.pk %}" class="bouton bouton-petit bouton-fantome">Télécharger</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" class="petit muet">Aucun rapport pour le moment. Générez le premier ci-dessus.</td></tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+</div>
+{% endblock %}

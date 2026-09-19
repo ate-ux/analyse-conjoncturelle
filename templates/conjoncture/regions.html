@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Régions{% endblock %}
+
+{% block contenu %}
+<div class="entete-page apparition">
+ <div class="fil">Territoires</div>
+ <h1>Les dix régions du Cameroun</h1>
+ <p>
+  Population, densité et pauvreté monétaire région par région. L'ECAM 5
+  distingue Yaoundé et Douala, dont les taux sont bien inférieurs à ceux des
+  régions qui les abritent.
+ </p>
+</div>
+
+{% if selection %}
+<div class="carte" style="margin-bottom:1.1rem;border-left:4px solid var(--or)">
+ <div class="carte-titre">
+  <h2 style="font-size:1.2rem">Région du {{ selection.nom }}</h2>
+  <a href="{% url 'conjoncture:regions' %}" class="bouton bouton-fantome bouton-petit">Voir toutes les régions</a>
+ </div>
+ <div class="grille grille-4">
+  <div class="kpi"><span class="etiquette">Chef-lieu</span><span class="valeur" style="font-size:1.35rem">{{ selection.chef_lieu }}</span></div>
+  <div class="kpi"><span class="etiquette">Population</span><span class="valeur">{{ selection.population }}<small>hab.</small></span></div>
+  <div class="kpi"><span class="etiquette">Superficie</span><span class="valeur">{{ selection.superficie }}<small>km²</small></span></div>
+  <div class="kpi"><span class="etiquette">Densité</span><span class="valeur">{{ selection.densite }}<small>hab/km²</small></span></div>
+ </div>
+ <div class="grille grille-2" style="margin-top:1rem">
+  <div class="bloc-stat">
+   <span class="etiquette">Taux de pauvreté (2022)</span>
+   <div class="valeur">{{ selection.pauvrete }} %</div>
+   {% if selection.note %}<p class="petit muet" style="margin:.4rem 0 0">{{ selection.note }}</p>{% endif %}
+   <div class="jauge or" style="margin-top:.7rem"><span style="width:{{ selection.pauvrete }}%"></span></div>
+  </div>
+  <div class="bloc-stat">
+   <span class="etiquette">Lecture</span>
+   <p class="petit" style="margin:.5rem 0 0">
+    La région du {{ selection.nom }} compte {{ selection.population }} habitants
+    pour {{ selection.superficie }} km², soit une densité de
+    {{ selection.densite }} habitants au km². Son taux de pauvreté de
+    {{ selection.pauvrete }} % se compare à la moyenne inter-régionale de
+    {{ region_analyse.pauvrete.moyenne }} %.
+   </p>
+  </div>
+ </div>
+</div>
+{% endif %}
+
+<div class="carte" style="margin-bottom:1.1rem">
+ <div class="carte-titre"><h2 style="font-size:1.05rem">Tableau régional complet</h2></div>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr>
+    <th>Région</th><th>Chef-lieu</th>
+    <th class="nombre">Population</th><th class="nombre">Superficie (km²)</th>
+    <th class="nombre">Densité</th><th class="nombre">Pauvreté 2022</th><th></th>
+   </tr></thead>
+   <tbody>
+    {% for r in regions %}
+    <tr>
+     <td><b>{{ r.nom }}</b></td>
+     <td>{{ r.chef_lieu }}</td>
+     <td class="nombre">{{ r.population }}</td>
+     <td class="nombre">{{ r.superficie }}</td>
+     <td class="nombre">{{ r.densite }}</td>
+     <td class="nombre">
+      <span class="{% if r.pauvrete > 50 %}etiquette-signif non{% endif %}" style="{% if r.pauvrete > 50 %}background:#fdf2f3;color:var(--rouge){% endif %}">{{ r.pauvrete }} %</span>
+     </td>
+     <td><a href="?region={{ r.cle|urlencode }}" class="petit">Détail</a></td>
+    </tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+ <p class="petit muet" style="margin-top:.7rem">
+  Source : INS Cameroun, ECAM 5 (2022) pour la pauvreté ; RGPH et projections
+  démographiques pour la population. Les villes de Yaoundé (10,8 %) et Douala
+  (8,3 %) bénéficient de taux de pauvreté bien plus faibles que leur région.
+ </p>
+</div>
+
+<div class="grille grille-2">
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">Pauvreté par région</h2></div>
+  <canvas class="graphique" id="graph-pauvrete"></canvas>
+ </div>
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">Population par région</h2></div>
+  <canvas class="graphique" id="graph-population"></canvas>
+ </div>
+</div>
+
+<div class="grille grille-3" style="margin-top:1.1rem">
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1rem">Disparité de pauvreté</h2></div>
+  <div class="kpi"><span class="etiquette">Écart maximal</span>
+   <span class="valeur" style="font-size:1.5rem">{{ region_analyse.ecart_pauvrete.max.pauvrete }}<small>%</small></span>
+   <span class="annexe">{{ region_analyse.ecart_pauvrete.max.nom }}, contre {{ region_analyse.ecart_pauvrete.min.pauvrete }} % ({{ region_analyse.ecart_pauvrete.min.nom }})</span>
+  </div>
+ </div>
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1rem">Concentration de la population</h2></div>
+  <div class="kpi"><span class="etiquette">Indice HHI</span>
+   <span class="valeur" style="font-size:1.5rem">{{ region_analyse.concentration_population.valeur }}</span>
+   <span class="annexe">{{ region_analyse.concentration_population.lecture }}</span>
+  </div>
+ </div>
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1rem">Coefficient de variation</h2></div>
+  <div class="kpi"><span class="etiquette">Population</span>
+   <span class="valeur" style="font-size:1.5rem">{{ region_analyse.population.cv }}<small>%</small></span>
+   <span class="annexe">Hétérogénéité des dix régions</span>
+  </div>
+ </div>
+</div>
+
+<script id="donnees-pauvrete" type="application/json">
+[{% for r in regions %}{"nom":"{{ r.nom }}","valeur":{{ r.pauvrete }}}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+<script id="donnees-population" type="application/json">
+[{% for r in regions %}{"nom":"{{ r.nom }}","valeur":{{ r.population }}}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'vendor/chart/chart.umd.js' %}"></script>
+<script src="{% static 'js/graphiques.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+ var p = document.getElementById("graph-pauvrete");
+ var jp = document.getElementById("donnees-pauvrete");
+ if (p && jp) traceBarres(p, JSON.parse(jp.textContent), "#c9a227", " %");
+ var q = document.getElementById("graph-population");
+ var jq = document.getElementById("donnees-population");
+ if (q && jq) traceBarres(q, JSON.parse(jq.textContent), "#1d6fa5", "");
+});
+</script>
+{% endblock %}

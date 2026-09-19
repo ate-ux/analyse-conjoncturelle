@@ -1,0 +1,36 @@
+# --- Python ---------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# --- Django ---------------------------------------------------------------
+db.sqlite3
+db.sqlite3-journal
+*.log
+staticfiles/
+media/
+
+# --- Secrets et configuration locale -------------------------------------
+.env
+.env.local
+*.key
+*.pem
+
+# --- Système et éditeurs --------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# --- Sauvegardes ----------------------------------------------------------
+*.bak
+*.zip

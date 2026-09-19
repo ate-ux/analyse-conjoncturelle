@@ -1,0 +1,121 @@
+/* =====================================================================
+   Logo de marque et signature
+   ===================================================================== */
+
+/* Le logo est détouré : il flotte sur le dégradé, sans encadré blanc. */
+.logo-marque {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.22));
+}
+
+/* Logo discret dans l'en-tête de l'application connectée */
+.marque-logo-entete {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.18));
+}
+
+/* Carte auteur : plaque claire pour accueillir la carte de marque */
+.carte-auteur {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 6px 22px rgba(10, 40, 80, 0.18);
+}
+
+.carte-auteur img {
+  width: 138px;
+  height: 58px;
+  object-fit: cover;
+  object-position: left center;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.auteur-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.06rem;
+  line-height: 1.34;
+  color: #16324f;
+}
+
+.auteur-texte strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1560c8;
+}
+
+.auteur-texte span {
+  font-size: 0.76rem;
+  opacity: 0.9;
+}
+
+.auteur-texte .auteur-contact {
+  font-size: 0.73rem;
+  color: #5a6b7d;
+}
+
+/* Signature sous le formulaire de connexion */
+.signature-carte {
+  margin-top: 1.3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--bord);
+  font-size: 0.76rem;
+  line-height: 1.6;
+  color: #5a6b7d;
+  text-align: center;
+}
+
+.signature-carte strong {
+  color: #1560c8;
+}
+
+.signature-carte a {
+  color: #1d7ae0;
+  text-decoration: none;
+}
+
+.signature-carte a:hover {
+  text-decoration: underline;
+}
+
+/* Pied de page de l'application connectée */
+.signature-pied {
+  margin-top: 2.4rem;
+  padding: 1.4rem 1rem 1.8rem;
+  border-top: 1px solid var(--bord);
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: #5a6b7d;
+}
+
+.signature-pied strong {
+  color: #1560c8;
+  font-weight: 700;
+}
+
+.signature-pied a {
+  color: #1d7ae0;
+  text-decoration: none;
+}
+
+.signature-pied a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+  .logo-marque { width: 50px; height: 50px; }
+  .marque-logo-entete { width: 28px; height: 28px; }
+  .carte-auteur img { width: 104px; height: 46px; }
+  .carte-auteur { flex-direction: column; align-items: flex-start; }
+}

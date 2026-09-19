@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Projection multivariée{% endblock %}
+
+{% block contenu %}
+<div class="tete-page">
+  <div>
+    <h1>Projection multivariée</h1>
+    <p class="sous">
+      {{ libelle }}{% if unite %} ({{ unite }}){% endif %} projeté à partir de ses
+      déterminants.
+    </p>
+  </div>
+</div>
+
+<div class="bloc">
+  <form method="get" class="grille-formulaire">
+    <input type="hidden" name="cible" value="{{ cible }}">
+    {% for c in choisies %}<input type="hidden" name="explicative" value="{{ c }}">{% endfor %}
+    <div class="champ-bloc">
+      <label for="horizon">Horizon (périodes)</label>
+      <select name="horizon" id="horizon" class="champ" onchange="this.form.submit()">
+        {% for h in horizons %}
+          <option value="{{ h }}" {% if h == horizon %}selected{% endif %}>{{ h }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+{% if not resultat %}
+  <div class="bloc">
+    <div class="alerte alerte-info">
+      Aucun modèle à projeter. Revenez à la page Multivarié pour en ajuster un.
+    </div>
+  </div>
+{% elif not resultat.disponible %}
+  <div class="bloc">
+    <h2>Projection impossible</h2>
+    <div class="alerte alerte-info">{{ resultat.raison }}</div>
+  </div>
+{% else %}
+
+  <div class="bloc">
+    <h2>Valeurs projetées</h2>
+    <table class="tableau">
+      <thead>
+        <tr><th>Période</th><th class="nombre">Valeur</th>
+            <th class="nombre">Borne basse</th><th class="nombre">Borne haute</th></tr>
+      </thead>
+      <tbody>
+        {% for p in resultat.points %}
+        <tr>
+          <td><strong>{{ p.periode }}</strong></td>
+          <td class="nombre">{{ p.valeur }}</td>
+          <td class="nombre">{{ p.bas }}</td>
+          <td class="nombre">{{ p.haut }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="aide-format">Intervalle de confiance : {{ resultat.intervalle }}.</p>
+  </div>
+
+  <div class="bloc">
+    <h2>Historique et projection</h2>
+    <canvas id="graphique-multivarie" height="120"></canvas>
+  </div>
+
+  <div class="bloc">
+    <h2>Points de vigilance</h2>
+    {% for a in resultat.alertes %}
+      <div class="alerte alerte-info">{{ a }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="bloc">
+    <h2>Lecture du résultat</h2>
+    <p>{{ synthese }}</p>
+  </div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'vendor/chart/chart.umd.js' %}"></script>
+<script id="historique-multivarie" type="application/json">{{ historique_json|safe }}</script>
+<script id="projection-multivarie" type="application/json">{{ projection_json|safe }}</script>
+<script src="{% static 'js/multivarie.js' %}"></script>
+{% endblock %}

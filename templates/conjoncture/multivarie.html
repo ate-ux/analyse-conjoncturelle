@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Prévision multivariée{% endblock %}
+
+{% block contenu %}
+<div class="tete-page">
+ <div>
+  <h1>Prévision multivariée</h1>
+  <p class="sous">
+   Relie une variable à ses déterminants : de quoi l'inflation dépend-elle,
+   et non seulement comment elle a évolué.
+  </p>
+ </div>
+</div>
+
+<div class="bloc">
+ <form method="get">
+  <div class="grille-formulaire">
+   <div class="champ-bloc">
+    <label for="cible">Variable à expliquer</label>
+    <select name="cible" id="cible" class="champ">
+     {% for c in catalogue %}
+      <option value="{{ c.cle }}" {% if c.cle == cible %}selected{% endif %}>
+       {{ c.libelle }}{% if c.unite %} ({{ c.unite }}){% endif %}
+      </option>
+     {% endfor %}
+    </select>
+   </div>
+   <div class="champ-bloc">
+    <label>Variables explicatives</label>
+    <p class="aide-format" style="margin-top:.3rem">
+     Maintenez Ctrl (ou Cmd) pour en choisir plusieurs. Par défaut, les trois
+     premières séries disponibles.
+    </p>
+   </div>
+  </div>
+
+  <fieldset class="groupe-champs">
+   <legend>Choisir les variables explicatives</legend>
+   <div class="grille-cases">
+    {% for c in catalogue %}
+     {% if c.cle != cible %}
+     <label class="case">
+      <input type="checkbox" name="explicative" value="{{ c.cle }}"
+          {% if c.cle in choisies %}checked{% endif %}>
+      <span>{{ c.libelle }}{% if c.unite %} ({{ c.unite }}){% endif %}</span>
+     </label>
+     {% endif %}
+    {% endfor %}
+   </div>
+  </fieldset>
+
+  <div class="pied-formulaire">
+   <button type="submit" class="bouton bouton-or">Ajuster le modèle</button>
+   <a href="{% url 'conjoncture:multivarie_prevision' %}?cible={{ cible }}{% for c in choisies %}&explicative={{ c }}{% endfor %}"
+     class="lien-secondaire">Projeter dans le temps</a>
+  </div>
+ </form>
+</div>
+
+{% if resultat %}
+ {% if not resultat.disponible %}
+  <div class="bloc">
+   <h2>Modèle non ajustable</h2>
+   <div class="alerte alerte-info">{{ resultat.raison }}</div>
+  </div>
+ {% else %}
+
+  <div class="grille-indicateurs">
+   <div class="tuile">
+    <span class="etiquette">R²</span>
+    <b>{{ resultat.r2 }}</b>
+    <small>part de la variance expliquée</small>
+   </div>
+   <div class="tuile">
+    <span class="etiquette">R² ajusté</span>
+    <b>{{ resultat.r2_ajuste }}</b>
+    <small>pénalisé par le nombre de variables</small>
+   </div>
+   <div class="tuile">
+    <span class="etiquette">Fisher</span>
+    <b>{{ resultat.f|default:", " }}</b>
+    <small>p = {{ resultat.p_fisher }}</small>
+   </div>
+   <div class="tuile">
+    <span class="etiquette">Durbin-Watson</span>
+    <b>{{ resultat.durbin_watson|default:", " }}</b>
+    <small>proche de 2 : résidus indépendants</small>
+   </div>
+   <div class="tuile">
+    <span class="etiquette">Observations</span>
+    <b>{{ resultat.n_observations }}</b>
+    <small>{{ resultat.periode_debut }} à {{ resultat.periode_fin }}</small>
+   </div>
+   <div class="tuile">
+    <span class="etiquette">Écart résiduel</span>
+    <b>{{ resultat.ecart_residuel|default:", " }}</b>
+    <small>erreur moyenne du modèle</small>
+   </div>
+  </div>
+
+  <div class="bloc">
+   <h2>Coefficients</h2>
+   <p class="aide-format">
+    Le coefficient s'interprète comme l'effet d'une hausse d'une unité de la
+    variable, toutes choses égales. Le VIF signale la redondance entre
+    variables : au-delà de 10, leurs coefficients individuels deviennent instables.
+   </p>
+   <div class="tableau-defilant">
+    <table class="tableau">
+     <thead>
+      <tr>
+       <th>Variable</th>
+       <th class="nombre">Coefficient</th>
+       <th class="nombre">Erreur</th>
+       <th class="nombre">t</th>
+       <th class="nombre">p</th>
+       <th class="nombre">VIF</th>
+      </tr>
+     </thead>
+     <tbody>
+      {% for c in resultat.coefficients %}
+      <tr {% if c.nom == 'constante' %}class="ligne-neutre"{% endif %}>
+       <td><strong>{{ c.nom }}</strong></td>
+       <td class="nombre">{{ c.valeur }}</td>
+       <td class="nombre">{{ c.erreur|default:", " }}</td>
+       <td class="nombre">{{ c.t|default:", " }}</td>
+       <td class="nombre">
+        {{ c.p|default:", " }}
+        {% if c.significatif %}<span class="marque-ok" title="significatif à 5 %">*</span>{% endif %}
+       </td>
+       <td class="nombre">{{ c.vif|default:", " }}</td>
+      </tr>
+      {% endfor %}
+     </tbody>
+    </table>
+   </div>
+   <p class="aide-format">* significatif au seuil de 5 %.</p>
+  </div>
+
+  {% if resultat.alertes %}
+  <div class="bloc">
+   <h2>Points de vigilance</h2>
+   {% for a in resultat.alertes %}
+    <div class="alerte alerte-info">{{ a }}</div>
+   {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="bloc">
+   <h2>Lecture du résultat</h2>
+   <p>{{ synthese }}</p>
+  </div>
+
+ {% endif %}
+{% else %}
+ <div class="bloc">
+  <div class="alerte alerte-info">
+   Choisissez une variable à expliquer et au moins une variable explicative.
+  </div>
+ </div>
+{% endif %}
+{% endblock %}

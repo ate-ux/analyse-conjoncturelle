@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Statistiques{% endblock %}
+
+{% block contenu %}
+<div class="entete-page apparition">
+ <div class="fil">Analyse quantitative</div>
+ <h1>Module statistique</h1>
+ <p>
+  Statistiques descriptives, tendance par les moindres carrés ordinaires,
+  prévision à court terme et corrélations testées au seuil de 5 %. Choisissez
+  un indicateur : les résultats se recalculent sur sa série complète.
+ </p>
+</div>
+
+<div class="carte" style="margin-bottom:1.1rem">
+ <form method="get" style="display:flex;gap:.8rem;align-items:flex-end;flex-wrap:wrap">
+  <div class="champ-groupe" style="margin:0;min-width:320px;flex:1">
+   <label for="indicateur">Indicateur analysé</label>
+   <select class="champ" name="indicateur" id="indicateur" onchange="this.form.submit()">
+    {% for cle, libelle in indicateurs.items %}
+    <option value="{{ cle }}" {% if cle == cle_active %}selected{% endif %}>{{ libelle }}</option>
+    {% endfor %}
+   </select>
+  </div>
+  <button type="submit" class="bouton">Recalculer</button>
+ </form>
+</div>
+
+{% if analyse %}
+<div class="grille grille-4" style="margin-bottom:1.1rem">
+ <div class="carte kpi">
+  <span class="etiquette">Moyenne</span>
+  <span class="valeur">{{ analyse.descriptif.moyenne }}<small>{{ analyse.unite }}</small></span>
+  <span class="annexe">Sur {{ analyse.descriptif.n }} observations</span>
+ </div>
+ <div class="carte kpi">
+  <span class="etiquette">Écart-type</span>
+  <span class="valeur">{{ analyse.descriptif.ecart_type }}<small>{{ analyse.unite }}</small></span>
+  <span class="annexe">CV : {{ analyse.descriptif.cv }} %</span>
+ </div>
+ <div class="carte kpi">
+  <span class="etiquette">Amplitude</span>
+  <span class="valeur">{{ analyse.descriptif.etendue }}<small>{{ analyse.unite }}</small></span>
+  <span class="annexe">de {{ analyse.descriptif.minimum }} à {{ analyse.descriptif.maximum }}</span>
+ </div>
+ <div class="carte kpi">
+  <span class="etiquette">Tendance annuelle</span>
+  <span class="valeur">{{ analyse.tendance.pente }}<small>pt/an</small></span>
+  <span class="annexe"><span class="etiquette-signif {% if analyse.tendance.significatif %}oui{% else %}non{% endif %}">{% if analyse.tendance.significatif %}significative{% else %}non significative{% endif %}</span></span>
+ </div>
+</div>
+
+<div class="carte" style="margin-bottom:1.1rem">
+ <div class="carte-titre">
+  <h2 style="font-size:1.1rem">{{ analyse.libelle }}, évolution</h2>
+  <span class="badge-source">{{ analyse.source }}</span>
+ </div>
+ <canvas class="graphique" style="height:300px" data-serie='{{ serie_json|safe }}' data-libelle="{{ analyse.libelle }}" data-unite="{{ analyse.unite }}" data-seuil="{{ analyse.seuil|default:'' }}"></canvas>
+ <p class="petit muet" style="margin-top:.7rem">{{ analyse.commentaire }}</p>
+</div>
+
+<div class="grille grille-2" style="margin-bottom:1.1rem">
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">Régression linéaire (MCO)</h2></div>
+  <div class="equation">
+   <b>y</b> = {{ analyse.tendance.ordonnee }} {{ analyse.tendance.pente|floatformat:4 }}·année
+  </div>
+  <table class="tableau" style="margin-top:1rem">
+   <tbody>
+    <tr><td>Pente annuelle</td><td class="nombre">{{ analyse.tendance.pente }}</td></tr>
+    <tr><td>Erreur type de la pente</td><td class="nombre">{{ analyse.tendance.erreur_pente|default:", " }}</td></tr>
+    <tr><td>Statistique de Student</td><td class="nombre">{{ analyse.tendance.t_stat|default:", " }}</td></tr>
+    <tr><td>p-value</td><td class="nombre">{{ analyse.tendance.p_value|default:"n.d." }}</td></tr>
+    <tr><td>Coefficient de détermination R²</td><td class="nombre">{{ analyse.tendance.r2 }}</td></tr>
+    <tr><td>Erreur standard résiduelle</td><td class="nombre">{{ analyse.tendance.erreur_standard }}</td></tr>
+    <tr><td>Période</td><td class="nombre">{{ analyse.tendance.debut }}–{{ analyse.tendance.fin }}</td></tr>
+   </tbody>
+  </table>
+ </div>
+
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">Prévision à trois ans</h2></div>
+  <canvas class="graphique" id="graph-prevision" style="height:190px"></canvas>
+  <div class="tableau-enveloppe" style="margin-top:1rem">
+   <table class="tableau">
+    <thead><tr><th>Année</th><th class="nombre">Prévision</th><th class="nombre">Borne basse</th><th class="nombre">Borne haute</th></tr></thead>
+    <tbody>
+     {% for p in analyse.prevision.points %}
+     <tr><td>{{ p.annee }}</td><td class="nombre">{{ p.valeur }}</td><td class="nombre">{{ p.bas }}</td><td class="nombre">{{ p.haut }}</td></tr>
+     {% endfor %}
+    </tbody>
+   </table>
+  </div>
+  <p class="petit muet" style="margin-top:.6rem">Intervalle de prévision à 80 %, fondé sur l'erreur type résiduelle.</p>
+ </div>
+</div>
+
+<div class="grille grille-2" style="margin-bottom:1.1rem">
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">Structure régionale</h2></div>
+  <table class="tableau">
+   <tbody>
+    <tr><td>Population, moyenne</td><td class="nombre">{{ regionale.population.moyenne }}</td></tr>
+    <tr><td>Population, écart-type</td><td class="nombre">{{ regionale.population.ecart_type }}</td></tr>
+    <tr><td>Pauvreté, moyenne inter-régionale</td><td class="nombre">{{ regionale.pauvrete.moyenne }} %</td></tr>
+    <tr><td>Pauvreté, écart-type</td><td class="nombre">{{ regionale.pauvrete.ecart_type }} pt</td></tr>
+    <tr><td>Densité, moyenne</td><td class="nombre">{{ regionale.densite.moyenne }} hab/km²</td></tr>
+    <tr><td>Concentration (HHI, population)</td><td class="nombre">{{ regionale.concentration_population.valeur }}, {{ regionale.concentration_population.lecture }}</td></tr>
+    <tr><td>Écart maximal de pauvreté</td><td class="nombre">{{ regionale.ecart_pauvrete.min.nom }} ({{ regionale.ecart_pauvrete.min.pauvrete }} %) → {{ regionale.ecart_pauvrete.max.nom }} ({{ regionale.ecart_pauvrete.max.pauvrete }} %)</td></tr>
+   </tbody>
+  </table>
+ </div>
+ <div class="carte">
+  <div class="carte-titre"><h2 style="font-size:1.05rem">Zone CEMAC (2025)</h2></div>
+  <table class="tableau">
+   <tbody>
+    <tr><td>PIB cumulé</td><td class="nombre">{{ cemac.totaux.pib_mds_usd }} Mds USD</td></tr>
+    <tr><td>Population de la zone</td><td class="nombre">{{ cemac.totaux.population_millions }} M</td></tr>
+    <tr><td>PIB par habitant (moyenne)</td><td class="nombre">{{ cemac.totaux.pib_par_habitant }} USD</td></tr>
+    <tr><td>Croissance, moyenne</td><td class="nombre">{{ cemac.croissance.moyenne }} %</td></tr>
+    <tr><td>Croissance, écart-type</td><td class="nombre">{{ cemac.croissance.ecart_type }} pt</td></tr>
+    <tr><td>Inflation, moyenne</td><td class="nombre">{{ cemac.inflation.moyenne }} %</td></tr>
+    <tr><td>Concentration du PIB (HHI)</td><td class="nombre">{{ cemac.concentration_pib.valeur }}, {{ cemac.concentration_pib.lecture }}</td></tr>
+   </tbody>
+  </table>
+ </div>
+</div>
+
+<div class="carte">
+ <div class="carte-titre"><h2 style="font-size:1.05rem">Corrélations entre indicateurs</h2></div>
+ <div class="tableau-enveloppe">
+  <table class="tableau">
+   <thead><tr><th>Indicateur A</th><th>Indicateur B</th><th class="nombre">r</th><th class="nombre">r²</th><th class="nombre">p-value</th><th>Lecture</th></tr></thead>
+   <tbody>
+    {% for c in correlations %}
+    <tr>
+     <td>{{ c.a }}</td><td>{{ c.b }}</td>
+     <td class="nombre">{{ c.r }}</td>
+     <td class="nombre">{{ c.r2 }}</td>
+     <td class="nombre">{{ c.p_value }}</td>
+     <td>{% if c.significatif %}<span class="etiquette-signif oui">significative</span>{% else %}<span class="etiquette-signif non">non significative</span>{% endif %} Corrélation {{ c.sens }} {{ c.force }} (n = {{ c.n }})</td>
+    </tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+ <p class="petit muet" style="margin-top:.7rem">
+  Corrélation n'est pas causalité : ces coefficients décrivent une co-mouvement
+  sur les années communes, non un mécanisme économique.
+ </p>
+</div>
+
+<script id="donnees-prevision" type="application/json">
+{"labels":[{% for p in analyse.prevision.points %}"{{ p.annee }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+ "valeurs":[{% for p in analyse.prevision.points %}{{ p.valeur }}{% if not forloop.last %},{% endif %}{% endfor %}],
+ "bas":[{% for p in analyse.prevision.points %}{{ p.bas }}{% if not forloop.last %},{% endif %}{% endfor %}],
+ "haut":[{% for p in analyse.prevision.points %}{{ p.haut }}{% if not forloop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'vendor/chart/chart.umd.js' %}"></script>
+<script src="{% static 'js/graphiques.js' %}"></script>
+{% endblock %}

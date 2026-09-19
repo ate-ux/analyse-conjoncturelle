@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Le Perpétuel{% endblock %}
+
+{% block contenu %}
+<div class="entete-page apparition">
+ <div class="fil">Assistant</div>
+ <h1>Le Perpétuel</h1>
+ <p>
+  Interrogez les données de la plateforme en langage naturel. L'assistant
+  répond avec les chiffres, les sources et les années ; les notes internes
+  ne sont accessibles qu'aux administrateurs.
+ </p>
+</div>
+
+<div class="assistant-grille">
+ <aside class="carte">
+  <div class="carte-titre"><h2 style="font-size:1rem">Conversations</h2></div>
+  <button class="bouton bouton-large bouton-fantome bouton-petit" id="nouvelle-conversation" style="margin-bottom:.7rem">Nouvelle conversation</button>
+  <div class="liste-conversations" id="liste-conversations">
+   {% for c in conversations %}
+   <a href="?conversation={{ c.pk }}" class="{% if conversation and c.pk == conversation.pk %}actif{% endif %}">
+    {{ c.titre|truncatechars:44 }}
+    <small>{{ c.maj_le|date:"d/m/Y H:i" }}</small>
+   </a>
+   {% empty %}
+   <p class="petit muet">Aucune conversation pour le moment.</p>
+   {% endfor %}
+  </div>
+
+  {% if notes_admin %}
+  <div class="carte-titre" style="margin-top:1.3rem"><h2 style="font-size:.95rem">Notes internes</h2></div>
+  <p class="petit muet" style="margin-top:-.4rem">Visibles des administrateurs uniquement.</p>
+  {% for n in notes_admin %}
+  <div class="bloc-stat" style="margin-top:.6rem;border-left-color:var(--rouge)">
+   <span class="etiquette">{{ n.titre }}</span>
+   <p class="petit" style="margin:.4rem 0 0">{{ n.contenu }}</p>
+  </div>
+  {% endfor %}
+  {% endif %}
+ </aside>
+
+ <section class="zone-discussion">
+  <div class="discussion-entete">
+   <div>
+    <strong style="font-family:var(--serif);color:var(--bleu-900)">Le Perpétuel</strong>
+    <div class="etat-assistant {% if en_ligne %}en-ligne{% else %}hors-ligne{% endif %}" id="etat-assistant">
+     <span class="point"></span>
+     <span id="texte-etat">{% if en_ligne %}en ligne, modèle connecté{% else %}hors ligne, base de connaissances locale{% endif %}</span>
+    </div>
+   </div>
+   <div class="bascule-mode">
+    <input type="checkbox" id="forcer-hors-ligne">
+    <label for="forcer-hors-ligne">Forcer le mode hors ligne</label>
+   </div>
+  </div>
+
+  <div class="fil-discussion" id="fil">
+   {% if messages_ %}
+    {% for m in messages_ %}
+    <div class="bulle {% if m.role == 'utilisateur' %}utilisateur{% else %}assistant{% endif %}">
+     {% if m.role == 'assistant' %}<span class="etiquette-mode">{{ m.get_mode_display }}</span>{% endif %}
+     {{ m.contenu }}
+    </div>
+    {% endfor %}
+   {% else %}
+    <div class="accueil-vide" id="accueil-vide">
+     <h3>Que souhaitez-vous savoir ?</h3>
+     <p class="petit">
+      Je m'appuie sur les données de la plateforme : Banque mondiale,
+      INS Cameroun, BEAC et DG Trésor.
+     </p>
+     <div class="suggestions">
+      <button data-question="Quelle est la situation de la croissance au Cameroun en 2025 ?">Croissance en 2025</button>
+      <button data-question="Où en est l'inflation et comment se situe-t-elle face au critère CEMAC ?">Inflation et critère CEMAC</button>
+      <button data-question="Quelles régions du Cameroun sont les plus pauvres ?">Régions les plus pauvres</button>
+      <button data-question="Quelle est la situation de la dette publique camerounaise ?">Dette publique</button>
+      <button data-question="Comment se porte la zone CEMAC dans son ensemble ?">La zone CEMAC</button>
+     </div>
+    </div>
+   {% endif %}
+  </div>
+
+  <div class="barre-saisie">
+   <textarea id="saisie" rows="1" placeholder="Posez votre question sur la conjoncture…"></textarea>
+   <button class="bouton bouton-or" id="envoyer">Envoyer</button>
+  </div>
+ </section>
+</div>
+
+<script id="etat-config" type="application/json">
+{"enLigne": {% if en_ligne %}true{% else %}false{% endif %},
+ "conversation": {% if conversation %}{{ conversation.pk }}{% else %}null{% endif %},
+ "urlMessage": "{% url 'conjoncture:assistant_message' %}",
+ "urlNouvelle": "{% url 'conjoncture:assistant_nouvelle' %}"}
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/assistant.js' %}"></script>
+{% endblock %}

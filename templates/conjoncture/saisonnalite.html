@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Saisonnalité{% endblock %}
+
+{% block contenu %}
+<div class="tete-page">
+ <div>
+  <h1>Désaisonnalisation</h1>
+  <p class="sous">
+   Sépare la tendance de fond, la saisonnalité et le résidu irrégulier.
+   Une embellie saisonnière n'est pas une reprise.
+  </p>
+ </div>
+ <span class="etiquette">{{ periodicite|capfirst }}</span>
+</div>
+
+<div class="bloc">
+ <form method="get" class="grille-formulaire">
+  <div class="champ-bloc">
+   <label for="serie">Série analysée</label>
+   <select name="serie" id="serie" class="champ" onchange="this.form.submit()">
+    {% for c in catalogue %}
+     <option value="{{ c.cle }}" {% if c.cle == cle %}selected{% endif %}>
+      {{ c.libelle }}{% if c.unite %} ({{ c.unite }}){% endif %}
+     </option>
+    {% endfor %}
+   </select>
+  </div>
+  <div class="champ-bloc">
+   <label for="modele">Modèle</label>
+   <select name="modele" id="modele" class="champ" onchange="this.form.submit()">
+    {% for valeur, libelle in modes %}
+     <option value="{{ valeur }}" {% if valeur == modele %}selected{% endif %}>
+      {{ libelle }}
+     </option>
+    {% endfor %}
+   </select>
+  </div>
+ </form>
+ {% if source %}<p class="aide-format">Source : {{ source }}</p>{% endif %}
+</div>
+
+{% if not decomposition %}
+ <div class="bloc">
+  <div class="alerte alerte-info">
+   Aucune décomposition possible pour cette série.
+  </div>
+ </div>
+{% elif not decomposition.disponible %}
+ <div class="bloc">
+  <h2>Décomposition impossible</h2>
+  <div class="alerte alerte-info">{{ decomposition.raison }}</div>
+  <p class="aide-format">
+   Une saisonnalité ne s'estime que sur des séries infra-annuelles couvrant
+   au moins deux années complètes.
+  </p>
+ </div>
+{% else %}
+
+ <div class="grille-indicateurs">
+  <div class="tuile">
+   <span class="etiquette">Périodicité</span>
+   <b>{{ decomposition.periodicite|capfirst }}</b>
+   <small>{{ decomposition.n_points }} points, {{ decomposition.n_annees }} années</small>
+  </div>
+  <div class="tuile">
+   <span class="etiquette">Modèle retenu</span>
+   <b>{{ decomposition.modele|capfirst }}</b>
+   <small>{{ justification }}</small>
+  </div>
+  <div class="tuile">
+   <span class="etiquette">Amplitude saisonnière</span>
+   <b>{{ decomposition.amplitude_saisonniere }}</b>
+   <small>écart entre le rang le plus haut et le plus bas</small>
+  </div>
+  <div class="tuile">
+   <span class="etiquette">Résidu</span>
+   <b>{{ decomposition.ecart_residuel|default:", " }}</b>
+   <small>
+    {% if decomposition.residu_relatif %}
+     soit {{ decomposition.residu_relatif|floatformat:4 }} du niveau moyen
+    {% else %}irrégulier{% endif %}
+   </small>
+  </div>
+ </div>
+
+ <div class="bloc">
+  <h2>Coefficients saisonniers</h2>
+  <table class="tableau">
+   <thead>
+    <tr><th>Rang</th><th>Coefficient</th><th>Effet</th><th>Sens</th></tr>
+   </thead>
+   <tbody>
+    {% for c in decomposition.coefficients %}
+    <tr>
+     <td><strong>{{ c.nom }}</strong></td>
+     <td class="nombre">{{ c.valeur }}</td>
+     <td class="nombre">
+      {% if decomposition.modele == 'multiplicatif' %}{{ c.effet }} %{% else %}{{ c.effet }}{% endif %}
+     </td>
+     <td>{{ c.sens }}</td>
+    </tr>
+    {% endfor %}
+   </tbody>
+  </table>
+ </div>
+
+ <div class="bloc">
+  <h2>Série observée, corrigée et tendance</h2>
+  <canvas id="graphique-saisonnalite" height="120"></canvas>
+ </div>
+
+ <div class="bloc">
+  <h2>Décomposition détaillée</h2>
+  <div class="tableau-defilant">
+   <table class="tableau">
+    <thead>
+     <tr>
+      <th>Période</th>
+      <th class="nombre">Observée</th>
+      <th class="nombre">Tendance</th>
+      <th class="nombre">Coefficient</th>
+      <th class="nombre">CVS</th>
+      <th class="nombre">Résidu</th>
+     </tr>
+    </thead>
+    <tbody>
+     {% for l in decomposition.lignes %}
+     <tr>
+      <td>{{ l.libelle }}</td>
+      <td class="nombre">{{ l.observee }}</td>
+      <td class="nombre">{{ l.tendance|default:", " }}</td>
+      <td class="nombre">{{ l.coef }}</td>
+      <td class="nombre">{{ l.cvs }}</td>
+      <td class="nombre">{{ l.residu|default:", " }}</td>
+     </tr>
+     {% endfor %}
+    </tbody>
+   </table>
+  </div>
+ </div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'vendor/chart/chart.umd.js' %}"></script>
+<script id="donnees-saisonnalite" type="application/json">{{ graphique_json|safe }}</script>
+<script src="{% static 'js/saisonnalite.js' %}"></script>
+{% endblock %}

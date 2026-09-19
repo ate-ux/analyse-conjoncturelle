@@ -1,0 +1,118 @@
+{% comment %}
+Gabarit autonome de la page de connexion.
+« Analyse conjoncturelle » s'affiche en fond, sur un panneau au design travaillé.
+{% endcomment %}
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connexion · Analyse conjoncturelle</title>
+<meta name="theme-color" content="#1560c8">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/images_marque.css' %}">
+</head>
+<body>
+
+<div class="ecran-connexion">
+
+  <!-- ================= Panneau de marque : « Analyse conjoncturelle » ======== -->
+  <section class="panneau-marque">
+    <div class="marque-haut">
+      <img class="logo-marque" src="{% static 'images/issea_logo.png' %}"
+           alt="Logo de l'ISSEA">
+      <span class="marque-nom">
+        DEUS Stat
+        <small>Observatoire de la conjoncture</small>
+      </span>
+    </div>
+
+    <div>
+      <h1 class="titre-immense">
+        Analyse<br>
+        <em>conjoncturelle</em>
+      </h1>
+      <p class="accroche">
+        Une lecture chiffrée et cartographiée de l'économie camerounaise et de
+        l'espace CEMAC : croissance, prix, pauvreté, finances publiques et
+        disparités territoriales, de 2000 à 2026.
+      </p>
+
+      <div class="bandeau-chiffres">
+        {% for item in apercu %}
+        <div>
+          <b>{{ item.valeur }}</b>
+          <span>{{ item.libelle }} · {{ item.annee }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="carte-auteur">
+      <img src="{% static 'images/deus_stat_carte.jpg' %}" alt="Carte de marque DEUS Stat">
+      <div class="auteur-texte">
+        <strong>Joseph ATEBA</strong>
+        <span>Data Scientist</span>
+        <span class="auteur-contact">atebajoseph047@gmail.com</span>
+        <span class="auteur-contact">+237 670 211 522</span>
+      </div>
+    </div>
+
+    <p class="pied-marque">
+      Sources : Banque mondiale (WDI), INS Cameroun (ECAM 5, RGPH),
+      BEAC / CEMAC, Direction générale du Trésor.
+    </p>
+  </section>
+
+  <!-- ================= Formulaire de connexion ============================= -->
+  <section class="panneau-formulaire">
+    <div class="carte-connexion">
+      <h1>Bienvenue</h1>
+      <p class="sous">Connectez-vous pour accéder à la plateforme.</p>
+
+      {% if form.non_field_errors %}
+        <div class="alerte alerte-erreur">
+          {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="champ-groupe">
+          <label for="{{ form.username.id_for_label }}">Nom d'utilisateur</label>
+          {{ form.username }}
+          {% if form.username.errors %}<div class="alerte alerte-erreur" style="margin-top:.5rem">{{ form.username.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="champ-groupe">
+          <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+          {{ form.password }}
+          {% if form.password.errors %}<div class="alerte alerte-erreur" style="margin-top:.5rem">{{ form.password.errors.0 }}</div>{% endif %}
+        </div>
+
+        <button type="submit" class="bouton bouton-large bouton-or">Se connecter</button>
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      </form>
+
+      <a href="{% url 'conjoncture:inscription' %}" class="lien-secondaire">
+        Pas encore de compte ? Créer un accès utilisateur
+      </a>
+
+      <div class="alerte alerte-info" style="margin-top:1.4rem;font-size:.82rem">
+        Deux administrateurs disposent des données confidentielles ; le nombre
+        d'utilisateurs n'est pas limité.
+      </div>
+
+      <p class="signature-carte">
+        Conçu et développé par <strong>Joseph ATEBA</strong>, Data Scientist<br>
+        <a href="mailto:atebajoseph047@gmail.com">atebajoseph047@gmail.com</a>
+        · <a href="tel:+237670211522">+237 670 211 522</a>
+      </p>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

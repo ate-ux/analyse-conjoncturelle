@@ -1,0 +1,46 @@
+# ---------------------------------------------------------------------------
+# Déploiement de l'application sur Render.
+#
+# Ce fichier décrit l'infrastructure. Sur Render, le plus simple reste de
+# créer le service à la main (voir GUIDE_DEPLOIEMENT_RENDER.md) ; ce fichier
+# permet aussi de tout créer d'un coup via « Blueprint ».
+# ---------------------------------------------------------------------------
+databases:
+  - name: conjoncture-db
+    databaseName: conjoncture
+    user: conjoncture
+    plan: free
+    region: frankfurt          # choisissez la région la plus proche de vos usagers
+
+services:
+  - type: web
+    name: analyse-conjoncturelle
+    runtime: python
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn conjoncture_project.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+    healthCheckPath: /connexion/
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true          # Render fabrique une clé aléatoire
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "*"                   # resserrez après le premier déploiement
+      - key: DATABASE_URL
+        fromDatabase:
+          name: conjoncture-db
+          property: connectionString
+      - key: WEB_CONCURRENCY
+        value: "2"
+      # À renseigner dans l'interface Render (onglet Environment) :
+      #   GROQ_API_KEY          clé gratuite de console.groq.com
+      #   ADMIN1_IDENTIFIANTS   identifiant:motdepasse du premier admin
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ADMIN1_IDENTIFIANTS
+        sync: false
