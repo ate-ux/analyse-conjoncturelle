@@ -1,6 +1,6 @@
 # Analyse conjoncturelle, Cameroun & zone CEMAC
 
-Plateforme web Django d'analyse conjoncturelle, réalisée comme projet académique
+Plateforme web Django d'analyse conjoncturelle, développé dans le cadre de mon parcours
 (ISSEA, option Data Science). Elle réunit un tableau de bord, des cartes
 interactives, un module statistique, un assistant conversationnel et un
 générateur automatique de rapports PDF.
